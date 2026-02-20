@@ -1,1 +1,0 @@
-# apanazar.github.io
