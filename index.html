@@ -2,747 +2,589 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <meta name="theme-color" content="#4a1824" />
-  <title>Abanazar — Домашняя полка</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abanazar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,400;1,7..72,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
-    }
-  }
-  </script>
   <style>
     :root {
-      --paper: #f0e2c4;
-      --paper-deep: #e4d0a8;
-      --paper-light: #f7edd6;
-      --ink: #1f1510;
-      --ink-soft: rgba(31, 21, 16, 0.62);
-      --hairline: rgba(31, 21, 16, 0.22);
-      --accent: #8b1e2d;
-      --carpet: #6b1d2a;
-      --carpet-deep: #3f1018;
-      --gold: #c9a227;
-      --wood: #3b2418;
-      --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
-      --sans: "Inter", Helvetica, Arial, sans-serif;
+      --ink: #2a1c14;
+      --ink-soft: #5c4638;
+      --paper: #f4e8cf;
+      --paper-edge: #e8d6b0;
+      --wood: #5a3a28;
+      --wood-dark: #3d261a;
+      --wood-light: #7a5640;
+      --gold: #c4a35a;
+      --accent: #7a2430;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
-      width: 100%;
       height: 100%;
       overflow: hidden;
-      background: var(--carpet-deep);
-      color: var(--ink);
-      font-family: var(--sans);
-      -webkit-font-smoothing: antialiased;
     }
 
-    button, a { font: inherit; color: inherit; }
+    body {
+      font-family: "Manrope", system-ui, sans-serif;
+      color: var(--ink);
+      background: #2a1218;
+    }
 
-    /* ===== EXPERIENCE SHELL (mint layout) ===== */
-    .press-experience {
-      isolation: isolate;
+    /* ===== ROOM: carpet wall ===== */
+    .room {
+      position: relative;
       width: 100%;
       height: 100dvh;
-      position: relative;
+      display: grid;
+      grid-template-columns: minmax(320px, 1.05fr) minmax(280px, 0.95fr);
+      gap: 0;
       overflow: hidden;
-      background:
-        radial-gradient(circle at 50% 38%, rgba(255, 220, 160, 0.14), transparent 42%),
-        radial-gradient(ellipse 90% 70% at 50% 100%, rgba(0, 0, 0, 0.35), transparent 55%),
-        linear-gradient(180deg, #5a2030 0%, #4a1824 40%, #2a0e14 100%);
     }
 
-    /* Wall carpet pattern overlay */
-    .press-experience::before {
-      content: "";
+    .carpet {
       position: absolute;
       inset: 0;
       z-index: 0;
-      pointer-events: none;
-      opacity: 0.55;
+      background-color: #6b1f2c;
       background-image:
-        /* outer frame */
-        linear-gradient(var(--carpet-deep), var(--carpet-deep)),
-        /* gold border ring simulation via layered pattern */
+        /* center medallion */
+        radial-gradient(ellipse 26% 32% at 50% 48%,
+          rgba(196, 163, 90, 0.35) 0%,
+          rgba(196, 163, 90, 0.12) 28%,
+          transparent 52%),
+        radial-gradient(ellipse 18% 22% at 50% 48%,
+          rgba(42, 18, 24, 0.55) 0%,
+          transparent 60%),
+        /* diamond lattice */
         repeating-linear-gradient(45deg,
-          transparent 0 22px,
-          rgba(201, 162, 39, 0.12) 22px 23px,
-          transparent 23px 44px),
+          transparent 0 20px,
+          rgba(196, 163, 90, 0.11) 20px 21px,
+          transparent 21px 40px),
         repeating-linear-gradient(-45deg,
-          transparent 0 22px,
-          rgba(201, 162, 39, 0.1) 22px 23px,
-          transparent 23px 44px),
+          transparent 0 20px,
+          rgba(196, 163, 90, 0.09) 20px 21px,
+          transparent 21px 40px),
+        /* vertical green bands */
         repeating-linear-gradient(90deg,
-          transparent 0 48px,
-          rgba(45, 74, 62, 0.18) 48px 52px,
-          transparent 52px 96px),
-        radial-gradient(ellipse 35% 40% at 50% 45%,
-          rgba(201, 162, 39, 0.22),
-          transparent 55%),
-        linear-gradient(180deg, #7a2838, #5a1828 50%, #3f1018);
-      background-blend-mode: normal;
-      box-shadow: inset 0 0 0 14px var(--carpet-deep), inset 0 0 0 18px rgba(201, 162, 39, 0.45), inset 0 0 0 36px var(--carpet-deep);
+          transparent 0 56px,
+          rgba(36, 72, 56, 0.22) 56px 62px,
+          transparent 62px 112px),
+        /* weave grain */
+        repeating-linear-gradient(0deg,
+          transparent 0 3px,
+          rgba(0, 0, 0, 0.03) 3px 4px),
+        linear-gradient(180deg, #7d2838 0%, #5c1a28 45%, #401018 100%);
+      box-shadow:
+        inset 0 0 0 12px #3a1018,
+        inset 0 0 0 16px rgba(196, 163, 90, 0.55),
+        inset 0 0 0 28px #4a1520,
+        inset 0 0 0 32px rgba(196, 163, 90, 0.25),
+        inset 0 0 80px rgba(0, 0, 0, 0.35);
     }
 
-    .press-experience::after {
-      z-index: 14;
-      pointer-events: none;
+    .carpet::after {
       content: "";
-      opacity: 0.16;
-      mix-blend-mode: multiply;
-      background-image:
-        radial-gradient(circle at 12% 31%, rgba(45, 35, 24, 0.12) 0 0.7px, transparent 0.8px),
-        radial-gradient(circle at 73% 69%, rgba(255, 255, 255, 0.9) 0 0.6px, transparent 0.7px);
-      background-size: 7px 9px, 11px 13px;
       position: absolute;
       inset: 0;
-    }
-
-    .shelf-canvas {
-      z-index: 1;
-      cursor: grab;
-      touch-action: none;
-      opacity: 0;
-      width: 100%;
-      height: 100%;
-      transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-      display: block;
-      position: absolute;
-      inset: 0;
-    }
-
-    .shelf-canvas.is-dragging { cursor: grabbing !important; }
-    .is-ready .shelf-canvas { opacity: 1; }
-
-    /* ===== HEADER ===== */
-    .site-header {
-      z-index: 20;
+      background:
+        radial-gradient(ellipse 70% 40% at 50% 0%, rgba(255, 210, 140, 0.12), transparent 60%),
+        radial-gradient(ellipse 50% 30% at 70% 80%, rgba(0, 0, 0, 0.2), transparent 70%);
       pointer-events: none;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding: 26px clamp(22px, 3.4vw, 56px);
-      display: flex;
+    }
+
+    /* warm room light */
+    .room::after {
+      content: "";
       position: absolute;
-      top: 0; left: 0; right: 0;
-      color: var(--paper);
-      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(ellipse 80% 50% at 50% 10%, rgba(255, 200, 120, 0.08), transparent 55%);
     }
 
-    .wordmark {
-      letter-spacing: 0.185em;
-      align-items: center;
-      gap: 13px;
-      font-size: 10px;
-      font-weight: 650;
-      line-height: 1;
-      display: flex;
-      text-transform: uppercase;
-    }
-
-    .wordmark__divider {
-      opacity: 0.45;
-      background: currentColor;
-      width: 28px;
-      height: 1px;
-    }
-
-    .edition-mark {
+    /* ===== LEFT: resume ===== */
+    .resume {
+      position: relative;
+      z-index: 2;
+      height: 100dvh;
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
-      gap: 4px;
-      font-size: 9px;
-      font-weight: 650;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      opacity: 0.9;
+      background:
+        linear-gradient(165deg, #f7edd8 0%, var(--paper) 40%, var(--paper-edge) 100%);
+      border-right: 1px solid rgba(61, 38, 26, 0.2);
+      box-shadow:
+        8px 0 40px rgba(0, 0, 0, 0.28),
+        inset -1px 0 0 rgba(255, 255, 255, 0.35);
     }
 
-    /* ===== LEFT: RESUME (mint left column role) ===== */
-    .resume-panel {
-      z-index: 16;
-      position: absolute;
-      top: clamp(72px, 12vh, 110px);
-      left: clamp(24px, 5.4vw, 92px);
-      width: min(430px, 36vw);
-      max-height: calc(100dvh - clamp(200px, 28vh, 280px));
-      overflow: hidden;
-      pointer-events: auto;
-      transition: opacity 0.42s, transform 0.52s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    .resume-panel::before {
-      z-index: -1;
-      content: "";
-      pointer-events: none;
-      background: linear-gradient(90deg, rgba(240, 226, 196, 0.96) 0%, rgba(240, 226, 196, 0.88) 58%, rgba(240, 226, 196, 0) 100%);
-      position: absolute;
-      inset: -28px -48px -28px -40px;
-    }
-
-    .is-focused .resume-panel {
-      opacity: 0;
-      transform: translateX(-22px);
-      pointer-events: none;
-    }
-
-    .resume-scroll {
-      max-height: inherit;
+    .resume-inner {
+      flex: 1;
       overflow-y: auto;
-      padding-right: 12px;
+      padding: clamp(1.5rem, 3.5vh, 2.5rem) clamp(1.4rem, 3vw, 2.4rem) 2rem;
       scrollbar-width: thin;
-      scrollbar-color: var(--hairline) transparent;
+      scrollbar-color: rgba(90, 58, 40, 0.35) transparent;
     }
 
-    .resume-scroll::-webkit-scrollbar { width: 6px; }
-    .resume-scroll::-webkit-scrollbar-thumb {
-      background: var(--hairline);
-      border-radius: 3px;
+    .resume-inner::-webkit-scrollbar { width: 8px; }
+    .resume-inner::-webkit-scrollbar-thumb {
+      background: rgba(90, 58, 40, 0.3);
+      border-radius: 4px;
     }
 
-    .resume-eyebrow {
+    .name {
+      font-family: "Literata", Georgia, serif;
+      font-size: clamp(2.2rem, 4vw, 3rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      color: var(--ink);
+      margin-bottom: 0.85rem;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1.15rem;
+    }
+
+    .badges span {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(122, 36, 48, 0.08);
+      border: 1px solid rgba(122, 36, 48, 0.2);
+      padding: 0.28rem 0.6rem;
+      border-radius: 2px;
+    }
+
+    .intro {
+      font-family: "Literata", Georgia, serif;
+      font-size: 0.98rem;
+      line-height: 1.55;
       color: var(--ink-soft);
+      max-width: 42ch;
+      margin-bottom: 1.75rem;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(122, 36, 48, 0.35);
+    }
+
+    .section {
+      margin-bottom: 1.6rem;
+    }
+
+    .section h2 {
+      font-size: 0.72rem;
+      font-weight: 700;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      font-size: 10px;
-      font-weight: 650;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .resume-eyebrow__line {
-      width: 28px;
-      height: 1px;
-      background: currentColor;
-      opacity: 0.45;
-    }
-
-    .resume-panel h1 {
-      font-family: var(--serif);
-      letter-spacing: -0.045em;
-      font-size: clamp(37px, 4.4vw, 64px);
-      font-weight: 500;
-      line-height: 0.92;
-      color: var(--ink);
-    }
-
-    .resume-badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin: 16px 0 14px;
-    }
-
-    .resume-badges span {
-      font-size: 10px;
-      font-weight: 650;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      border: 1px solid var(--hairline);
-      padding: 4px 8px;
-      border-radius: 999px;
-      color: var(--ink-soft);
-      background: rgba(255, 255, 255, 0.25);
-    }
-
-    .resume-intro {
-      font-family: var(--serif);
-      font-size: clamp(14px, 1.15vw, 17px);
-      line-height: 1.4;
-      color: var(--ink-soft);
-      max-width: 38ch;
-    }
-
-    .resume-section {
-      margin-top: 22px;
-    }
-
-    .resume-section h2 {
-      font-family: var(--sans);
-      font-size: 10px;
-      font-weight: 650;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
       color: var(--accent);
-      margin-bottom: 10px;
+      margin-bottom: 0.9rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid rgba(90, 58, 40, 0.18);
     }
 
-    .exp {
-      margin-bottom: 14px;
+    .job {
+      margin-bottom: 1.25rem;
     }
 
-    .exp-top {
+    .job:last-child { margin-bottom: 0; }
+
+    .job-head {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px 12px;
       align-items: baseline;
       justify-content: space-between;
+      gap: 0.35rem 0.75rem;
+      margin-bottom: 0.15rem;
     }
 
-    .exp a {
-      font-family: var(--serif);
-      font-size: 17px;
-      font-weight: 500;
-      text-decoration: none;
+    .job-head a {
+      font-family: "Literata", Georgia, serif;
+      font-size: 1.15rem;
+      font-weight: 600;
       color: var(--ink);
-      border-bottom: 1px solid transparent;
+      text-decoration: none;
     }
 
-    .exp a:hover { border-bottom-color: var(--ink); }
-
-    .exp-date {
-      font-size: 11px;
-      color: var(--ink-soft);
-      letter-spacing: 0.02em;
-    }
-
-    .exp-role {
-      font-family: var(--serif);
-      font-style: italic;
-      font-size: 14px;
+    .job-head a:hover {
       color: var(--accent);
-      margin: 2px 0 6px;
+      text-decoration: underline;
+      text-underline-offset: 3px;
     }
 
-    .exp ul {
+    .job-date {
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      opacity: 0.85;
+    }
+
+    .job-role {
+      font-family: "Literata", Georgia, serif;
+      font-style: italic;
+      font-size: 0.95rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .job ul {
       list-style: none;
-      font-size: 12.5px;
-      line-height: 1.4;
+      font-size: 0.88rem;
+      line-height: 1.45;
       color: var(--ink-soft);
     }
 
-    .exp li {
+    .job li {
       position: relative;
-      padding-left: 12px;
-      margin-bottom: 4px;
+      padding-left: 0.95rem;
+      margin-bottom: 0.35rem;
     }
 
-    .exp li::before {
+    .job li::before {
       content: "";
       position: absolute;
       left: 0;
       top: 0.55em;
-      width: 4px;
-      height: 4px;
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
       background: var(--gold);
+      opacity: 0.85;
     }
 
     .skills {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
+      gap: 0.35rem;
     }
 
     .skills span {
-      font-size: 11px;
-      padding: 3px 8px;
-      border: 1px solid var(--hairline);
+      font-size: 0.8rem;
+      padding: 0.3rem 0.65rem;
+      background: rgba(90, 58, 40, 0.06);
+      border: 1px solid rgba(90, 58, 40, 0.14);
       border-radius: 2px;
       color: var(--ink);
-      background: rgba(255, 255, 255, 0.2);
     }
 
-    .resume-links {
+    .contacts {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px 16px;
-      margin-top: 18px;
-      padding-top: 14px;
-      border-top: 1px solid var(--hairline);
+      gap: 0.65rem 1.1rem;
+      margin-top: 1.75rem;
+      padding-top: 1.1rem;
+      border-top: 1px solid rgba(90, 58, 40, 0.18);
     }
 
-    .resume-links a {
-      font-size: 12px;
+    .contacts a {
+      font-size: 0.88rem;
       font-weight: 600;
-      letter-spacing: 0.04em;
-      text-decoration: none;
       color: var(--ink);
-      border-bottom: 1px solid var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(42, 28, 20, 0.35);
       padding-bottom: 1px;
     }
 
-    .resume-links a:hover { color: var(--accent); border-color: var(--accent); }
-
-    /* ===== BROWSE CAPTION (current book) ===== */
-    .browse-caption {
-      z-index: 16;
-      isolation: isolate;
-      pointer-events: none;
-      width: min(360px, 32vw);
-      transition: opacity 0.42s, transform 0.52s cubic-bezier(0.22, 1, 0.36, 1);
-      position: absolute;
-      bottom: clamp(150px, 20vh, 210px);
-      right: clamp(24px, 5vw, 80px);
-      text-align: right;
-      color: var(--paper);
-      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+    .contacts a:hover {
+      color: var(--accent);
+      border-color: var(--accent);
     }
 
-    .browse-caption::before {
-      z-index: -1;
-      content: "";
-      pointer-events: none;
-      background: linear-gradient(270deg, rgba(63, 16, 24, 0.75) 0%, rgba(63, 16, 24, 0.45) 55%, transparent 100%);
-      position: absolute;
-      inset: -28px -40px -24px -60px;
-    }
-
-    .is-focused .browse-caption {
-      opacity: 0;
-      transform: translateX(22px);
-    }
-
-    .browse-caption .eyebrow {
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      font-size: 10px;
-      font-weight: 650;
+    /* ===== RIGHT: shelf ===== */
+    .shelf-side {
+      position: relative;
+      z-index: 2;
+      height: 100dvh;
       display: flex;
       align-items: center;
-      justify-content: flex-end;
-      gap: 10px;
-      opacity: 0.85;
-      margin-bottom: 10px;
+      justify-content: center;
+      padding: clamp(1.5rem, 4vw, 3rem);
     }
 
-    .eyebrow__line {
-      width: 28px;
-      height: 1px;
-      background: currentColor;
-      opacity: 0.45;
+    .bookshelf {
+      width: min(100%, 420px);
+      display: flex;
+      flex-direction: column;
+      filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.45));
     }
 
-    .browse-caption h2 {
-      font-family: var(--serif);
-      letter-spacing: -0.04em;
-      margin: 0;
-      font-size: clamp(28px, 3.2vw, 48px);
-      font-weight: 500;
-      line-height: 0.95;
+    .books-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 0.55rem;
+      padding: 0 1.1rem 0;
+      min-height: 280px;
     }
 
-    .browse-caption__author {
-      font-family: var(--serif);
-      font-style: italic;
-      margin: 12px 0 0;
-      font-size: 15px;
-      opacity: 0.85;
-    }
-
-    .inspect-button {
-      cursor: pointer;
-      pointer-events: auto;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      background: transparent;
-      border: none;
-      border-bottom: 1px solid currentColor;
-      align-items: center;
-      gap: 16px;
-      margin-top: 18px;
-      margin-left: auto;
-      padding: 0 0 7px;
-      font-size: 10px;
-      font-weight: 620;
-      display: inline-flex;
-      color: var(--paper);
-    }
-
-    .inspect-button:disabled {
-      opacity: 0.35;
-      cursor: default;
-    }
-
-    .inspect-button span:last-child {
-      font-size: 14px;
-      font-weight: 420;
-      transition: transform 0.22s;
-    }
-
-    .inspect-button:not(:disabled):hover span:last-child {
-      transform: translate(2px, -2px);
-    }
-
-    /* ===== ARROWS ===== */
-    .shelf-arrow {
-      z-index: 17;
-      border: 1px solid rgba(240, 226, 196, 0.35);
-      cursor: pointer;
-      -webkit-backdrop-filter: blur(10px);
-      backdrop-filter: blur(10px);
-      background: rgba(240, 226, 196, 0.55);
-      border-radius: 50%;
-      place-items: center;
-      width: 50px;
-      height: 50px;
-      transition: opacity 0.26s, transform 0.26s, background-color 0.22s;
-      display: grid;
-      position: absolute;
-      top: 49%;
-      color: var(--ink);
-    }
-
-    .shelf-arrow:hover:not(:disabled) {
-      background: rgba(247, 237, 214, 0.88);
-      transform: scale(1.06);
-    }
-
-    .shelf-arrow:disabled {
-      cursor: default;
-      opacity: 0.25;
-    }
-
-    .is-focused .shelf-arrow {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .shelf-arrow--left { left: clamp(15px, 2.7vw, 44px); }
-    .shelf-arrow--right { right: clamp(15px, 2.7vw, 44px); }
-
-    .arrow-icon {
-      width: 12px;
-      height: 12px;
-      border-top: 1.5px solid currentColor;
-      border-right: 1.5px solid currentColor;
-      display: block;
-    }
-
-    .arrow-icon--left { transform: rotate(-135deg); margin-left: 3px; }
-    .arrow-icon--right { transform: rotate(45deg); margin-right: 3px; }
-
-    /* ===== INDEX ===== */
-    .shelf-index {
-      z-index: 19;
-      grid-template-columns: minmax(200px, 1fr) auto;
-      align-items: end;
-      gap: 38px;
-      transition: opacity 0.3s, transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
-      display: grid;
-      position: absolute;
-      bottom: 28px;
-      left: clamp(24px, 5vw, 82px);
-      right: clamp(24px, 5vw, 82px);
-      color: var(--paper);
-    }
-
-    .is-focused .shelf-index {
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(12px);
-    }
-
-    .shelf-index__ticks {
-      display: grid;
-      grid-template-columns: repeat(var(--book-count, 8), 1fr);
-      align-items: end;
-      height: 21px;
-    }
-
-    .shelf-index__ticks button {
-      cursor: pointer;
-      background: transparent;
-      border: none;
-      width: 100%;
-      height: 21px;
-      padding: 0;
-      display: block;
+    .plank {
+      height: 22px;
+      border-radius: 2px;
+      background:
+        linear-gradient(180deg,
+          #8b6348 0%,
+          var(--wood-light) 18%,
+          var(--wood) 48%,
+          var(--wood-dark) 100%);
+      box-shadow:
+        0 4px 0 #24140e,
+        0 10px 18px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 230, 190, 0.28);
       position: relative;
     }
 
-    .shelf-index__ticks button::before {
+    .plank::before {
       content: "";
-      background: rgba(240, 226, 196, 0.35);
+      position: absolute;
+      left: 6%;
+      right: 6%;
+      top: 5px;
       height: 1px;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* side uprights */
+    .bookshelf {
+      position: relative;
+      padding: 0 10px;
+    }
+
+    .bookshelf::before,
+    .bookshelf::after {
+      content: "";
       position: absolute;
-      bottom: 4px;
-      left: 0;
-      right: 0;
-    }
-
-    .shelf-index__ticks button span {
-      z-index: 1;
-      background: var(--paper);
-      opacity: 0.48;
-      width: 1px;
-      height: 7px;
-      transition: height 0.22s, opacity 0.22s, width 0.22s;
-      position: absolute;
-      bottom: 1px;
-      right: 50%;
-    }
-
-    .shelf-index__ticks button:hover span,
-    .shelf-index__ticks button.is-active span {
-      opacity: 1;
-      width: 2px;
-      height: 18px;
-    }
-
-    .shelf-index__ticks button.is-project span {
-      background: var(--gold);
-    }
-
-    .input-hint {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 9px;
-      font-weight: 650;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      opacity: 0.7;
-      white-space: nowrap;
-    }
-
-    .input-hint i {
+      top: -12px;
+      bottom: 0;
       width: 14px;
-      height: 1px;
-      background: currentColor;
-      opacity: 0.4;
-      font-style: normal;
-    }
-
-    /* ===== BOOK DETAILS (inspect panel) ===== */
-    .book-details {
-      z-index: 22;
-      opacity: 0;
-      pointer-events: none;
-      width: min(620px, 44vw);
-      height: 100%;
-      transition: opacity 0.42s 80ms, transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
-      position: absolute;
-      top: 0;
-      right: 0;
-      transform: translateX(44px);
-      color: var(--ink);
-    }
-
-    .book-details::before {
-      z-index: -1;
-      content: "";
       background:
-        linear-gradient(90deg, transparent, rgba(240, 226, 196, 0.82) 10%, var(--paper) 24%),
-        var(--paper);
+        linear-gradient(90deg,
+          #2e1a12 0%,
+          var(--wood-dark) 35%,
+          var(--wood) 70%,
+          #2e1a12 100%);
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.35);
+      border-radius: 2px 2px 0 0;
+      z-index: 1;
+    }
+
+    .bookshelf::before { left: 0; }
+    .bookshelf::after { right: 0; }
+
+    /* ===== BOOKS ===== */
+    .book {
+      --book-h: 250px;
+      --book-w: 52px;
+      --spine: #6b1f2c;
+      --spine-light: #8a2f3d;
+      --spine-dark: #4a1520;
+      appearance: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      width: var(--book-w);
+      height: var(--book-h);
+      position: relative;
+      flex-shrink: 0;
+      background: transparent;
+      transform-origin: bottom center;
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), filter 0.25s ease;
+      filter: drop-shadow(2px 6px 6px rgba(0, 0, 0, 0.35));
+      font: inherit;
+      color: #f4e8cf;
+    }
+
+    .book:hover,
+    .book:focus-visible {
+      transform: translateY(-16px) rotate(-1.5deg);
+      filter: drop-shadow(4px 14px 12px rgba(0, 0, 0, 0.45));
+      outline: none;
+      z-index: 3;
+    }
+
+    .book:active {
+      transform: translateY(-8px);
+    }
+
+    .book-spine {
       position: absolute;
       inset: 0;
-    }
-
-    .is-focused .book-details {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateX(0);
-    }
-
-    .book-details__inner {
-      border-left: 1px solid rgba(37, 35, 31, 0.08);
-      grid-template-rows: auto auto minmax(0, 1fr) auto;
-      height: 100%;
-      padding: 24px clamp(24px, 3.5vw, 56px) 28px clamp(40px, 5vw, 80px);
-      display: grid;
-      gap: 0;
-    }
-
-    .book-details__top {
+      border-radius: 2px 3px 1px 1px;
+      background:
+        linear-gradient(90deg,
+          rgba(0, 0, 0, 0.28) 0%,
+          transparent 14%,
+          transparent 86%,
+          rgba(0, 0, 0, 0.2) 100%),
+        linear-gradient(180deg, var(--spine-light), var(--spine) 45%, var(--spine-dark));
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-    }
-
-    .book-details__position {
-      letter-spacing: 0.14em;
       align-items: center;
-      gap: 8px;
-      font-size: 9px;
-      font-weight: 620;
+      justify-content: center;
+      box-shadow:
+        inset 2px 0 0 rgba(255, 255, 255, 0.1),
+        inset -1px 0 0 rgba(0, 0, 0, 0.25);
+    }
+
+    .book-spine span {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-family: "Literata", Georgia, serif;
+      font-weight: 600;
+      font-size: 1.05rem;
+      letter-spacing: 0.18em;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+      user-select: none;
+    }
+
+    .book-pages {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      right: -5px;
+      width: 5px;
+      border-radius: 0 1px 1px 0;
+      background: repeating-linear-gradient(
+        180deg,
+        #f2e6cc 0 2px,
+        #dcc9a6 2px 3px
+      );
+      box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .book.wge {
+      --spine: #1f3d5c;
+      --spine-light: #2f5a82;
+      --spine-dark: #142a40;
+      --book-w: 56px;
+      --book-h: 268px;
+    }
+
+    .book.seaf {
+      --spine: #1f4d3c;
+      --spine-light: #2f6d54;
+      --spine-dark: #123528;
+      --book-w: 50px;
+      --book-h: 248px;
+    }
+
+    /* ===== MODAL ===== */
+    .modal-root {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
       display: flex;
-      color: var(--ink-soft);
-      text-transform: uppercase;
-      white-space: nowrap;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(20, 8, 10, 0.62);
+      backdrop-filter: blur(5px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.28s ease, visibility 0.28s ease;
     }
 
-    .book-details__position span:first-child::after {
-      content: "";
-      opacity: 0.28;
-      background: currentColor;
-      width: 34px;
-      height: 1px;
-      margin: 0 9px 3px 13px;
-      display: inline-block;
+    .modal-root.open {
+      opacity: 1;
+      visibility: visible;
     }
 
-    .close-inspect {
-      border: 1px solid var(--hairline);
-      background: transparent;
-      border-radius: 999px;
-      padding: 7px 14px;
-      font-size: 10px;
-      font-weight: 650;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background 0.15s;
+    .modal {
+      width: min(880px, 100%);
+      max-height: min(88dvh, 820px);
+      background: linear-gradient(165deg, #f7edd8, var(--paper) 50%, var(--paper-edge));
+      border: 1px solid rgba(61, 38, 26, 0.25);
+      border-radius: 3px;
+      box-shadow:
+        0 0 0 6px rgba(90, 58, 40, 0.35),
+        0 24px 60px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: translateY(12px) scale(0.98);
+      transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    .close-inspect:hover { background: rgba(0, 0, 0, 0.05); }
-
-    .book-details__copy {
-      scrollbar-width: thin;
-      scrollbar-color: var(--hairline) transparent;
-      align-self: stretch;
-      max-height: 100%;
-      min-height: 0;
-      padding: 18px 0 12px;
-      overflow-y: auto;
+    .modal-root.open .modal {
+      transform: none;
     }
 
-    .book-details h2 {
-      text-wrap: balance;
-      max-width: 500px;
-      font-family: var(--serif);
-      letter-spacing: -0.055em;
-      margin: 0;
-      font-size: clamp(36px, 3.8vw, 58px);
-      font-weight: 500;
-      line-height: 0.94;
+    .modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.1rem 1.25rem;
+      background: linear-gradient(180deg, var(--wood-light), var(--wood-dark));
+      color: var(--paper);
+      border-bottom: 2px solid var(--gold);
     }
 
-    .book-details__author {
-      color: var(--ink-soft);
-      font-family: var(--serif);
-      margin: 12px 0 0;
-      font-size: 17px;
+    .modal-head h2 {
+      font-family: "Literata", Georgia, serif;
+      font-size: 1.55rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .modal-head p {
+      font-family: "Literata", Georgia, serif;
       font-style: italic;
+      font-size: 0.95rem;
+      opacity: 0.85;
+      margin-top: 0.2rem;
     }
 
-    /* carousel */
+    .modal-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .modal-actions a,
+    .modal-actions button {
+      font-family: "Manrope", sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: 1px solid rgba(244, 232, 207, 0.35);
+      background: rgba(0, 0, 0, 0.18);
+      color: var(--paper);
+      padding: 0.4rem 0.75rem;
+      border-radius: 2px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .modal-actions a:hover,
+    .modal-actions button:hover {
+      background: rgba(0, 0, 0, 0.32);
+    }
+
+    .modal-body {
+      overflow-y: auto;
+      padding: 1.15rem 1.25rem 1.5rem;
+      flex: 1;
+      scrollbar-width: thin;
+    }
+
     .carousel {
-      margin: 22px 0 18px;
-      border: 1px solid var(--hairline);
+      margin-bottom: 1.2rem;
+      border: 1px solid rgba(90, 58, 40, 0.18);
       border-radius: 2px;
       overflow: hidden;
-      background: rgba(59, 36, 24, 0.06);
+      background: rgba(61, 38, 26, 0.06);
     }
 
     .carousel-viewport {
-      position: relative;
       aspect-ratio: 16 / 10;
-      background: linear-gradient(145deg, #3b2418, #1f1510);
+      background: linear-gradient(145deg, #3d261a, #1a100c);
       display: grid;
       place-items: center;
+      position: relative;
     }
 
     .carousel-viewport img {
@@ -754,73 +596,80 @@
 
     .carousel-viewport img.active { display: block; }
 
-    .carousel-placeholder {
-      color: rgba(240, 226, 196, 0.55);
+    .carousel-empty {
+      color: rgba(244, 232, 207, 0.5);
+      font-size: 0.9rem;
       text-align: center;
-      font-size: 13px;
       line-height: 1.5;
       padding: 1rem;
     }
 
-    .carousel-placeholder code {
+    .carousel-empty code {
       display: block;
-      margin-top: 8px;
-      font-size: 11px;
+      margin-top: 0.4rem;
+      font-size: 0.78rem;
       color: var(--gold);
     }
 
-    .carousel-nav {
+    .carousel-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 10px;
-      border-top: 1px solid var(--hairline);
-      background: rgba(255, 255, 255, 0.25);
+      padding: 0.5rem 0.7rem;
+      border-top: 1px solid rgba(90, 58, 40, 0.14);
+      background: rgba(255, 255, 255, 0.2);
     }
 
-    .carousel-nav button {
-      border: 1px solid var(--hairline);
+    .carousel-bar button {
+      font: inherit;
+      font-size: 0.85rem;
+      border: 1px solid rgba(90, 58, 40, 0.2);
       background: transparent;
-      padding: 4px 12px;
+      padding: 0.3rem 0.7rem;
       cursor: pointer;
-      font-size: 12px;
       border-radius: 2px;
+      color: var(--ink);
     }
 
-    .carousel-nav button:disabled { opacity: 0.35; cursor: default; }
-    .carousel-nav button:not(:disabled):hover { background: rgba(0, 0, 0, 0.04); }
+    .carousel-bar button:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
 
-    .carousel-counter {
-      font-size: 11px;
-      letter-spacing: 0.08em;
+    .carousel-bar span {
+      font-size: 0.8rem;
       color: var(--ink-soft);
     }
 
     .readme {
-      font-family: var(--serif);
-      font-size: clamp(14px, 1.1vw, 17px);
-      line-height: 1.42;
+      font-family: "Literata", Georgia, serif;
+      font-size: 0.98rem;
+      line-height: 1.55;
       color: var(--ink-soft);
     }
 
-    .readme-loading, .readme-error {
+    .readme-status {
       font-style: italic;
-      padding: 12px 0;
+      padding: 0.5rem 0;
     }
 
-    .readme-error { color: var(--accent); }
+    .readme-status.error { color: var(--accent); }
 
     .readme h1, .readme h2, .readme h3 {
-      font-family: var(--serif);
+      font-family: "Literata", Georgia, serif;
       color: var(--ink);
-      line-height: 1.15;
+      line-height: 1.2;
       margin: 1.1em 0 0.4em;
-      letter-spacing: -0.02em;
+      font-weight: 600;
     }
 
-    .readme h1 { font-size: 1.45em; font-weight: 500; }
-    .readme h2 { font-size: 1.2em; font-weight: 500; border-bottom: 1px solid var(--hairline); padding-bottom: 0.2em; }
-    .readme h3 { font-size: 1.05em; font-weight: 500; }
+    .readme h1 { font-size: 1.45em; }
+    .readme h2 {
+      font-size: 1.2em;
+      border-bottom: 1px solid rgba(90, 58, 40, 0.15);
+      padding-bottom: 0.25em;
+    }
+    .readme h3 { font-size: 1.05em; }
     .readme p { margin: 0.65em 0; }
     .readme a { color: var(--accent); }
     .readme ul, .readme ol { margin: 0.5em 0 0.5em 1.2em; }
@@ -828,316 +677,177 @@
     .readme code {
       font-family: ui-monospace, Consolas, monospace;
       font-size: 0.86em;
-      background: rgba(59, 36, 24, 0.08);
+      background: rgba(61, 38, 26, 0.08);
       padding: 0.1em 0.35em;
       border-radius: 2px;
     }
     .readme pre {
-      background: #1f1510;
+      background: #2a1c14;
       color: var(--paper);
-      padding: 12px 14px;
+      padding: 0.85rem 1rem;
       overflow-x: auto;
       border-radius: 2px;
-      margin: 0.8em 0;
-      font-size: 0.82em;
+      margin: 0.75em 0;
+      font-size: 0.84em;
     }
     .readme pre code { background: none; padding: 0; color: inherit; }
     .readme img {
       max-width: 100%;
       height: auto;
-      border: 1px solid var(--hairline);
+      border: 1px solid rgba(90, 58, 40, 0.15);
       margin: 0.5em 0;
     }
     .readme blockquote {
       border-left: 2px solid var(--gold);
-      margin: 0.8em 0;
-      padding: 0.2em 0 0.2em 14px;
+      margin: 0.75em 0;
+      padding: 0.15em 0 0.15em 0.9em;
       font-style: italic;
     }
     .readme hr {
       border: none;
-      border-top: 1px solid var(--hairline);
+      border-top: 1px solid rgba(90, 58, 40, 0.18);
       margin: 1em 0;
     }
 
-    .book-details__footer {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      padding-top: 12px;
-      border-top: 1px solid var(--hairline);
-    }
+    @media (max-width: 820px) {
+      body { overflow: auto; }
+      html { overflow: auto; }
 
-    .book-details__footer a {
-      text-decoration: none;
-      font-size: 11px;
-      font-weight: 650;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      border-bottom: 1px solid currentColor;
-      padding-bottom: 3px;
-    }
-
-    .book-details__footer a:hover { color: var(--accent); }
-
-    /* ===== LOADING ===== */
-    .loading-screen {
-      z-index: 40;
-      background:
-        radial-gradient(circle at 50% 40%, rgba(201, 162, 39, 0.12), transparent 50%),
-        linear-gradient(180deg, #5a2030, #3f1018);
-      place-content: center;
-      justify-items: center;
-      transition: opacity 0.72s 0.12s, visibility 0.72s 0.12s;
-      display: grid;
-      position: absolute;
-      inset: 0;
-      color: var(--paper);
-    }
-
-    .is-ready .loading-screen {
-      visibility: hidden;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .loading-screen__mark {
-      align-items: flex-end;
-      gap: 5px;
-      height: 62px;
-      display: flex;
-    }
-
-    .loading-screen__mark span {
-      background: var(--paper);
-      width: 13px;
-      animation: 1.25s ease-in-out infinite alternate assemble;
-      display: block;
-    }
-
-    .loading-screen__mark span:first-child { height: 46px; }
-    .loading-screen__mark span:nth-child(2) { height: 59px; animation-delay: -0.42s; }
-    .loading-screen__mark span:nth-child(3) { height: 39px; animation-delay: -0.78s; }
-
-    .loading-screen p {
-      letter-spacing: 0.17em;
-      text-transform: uppercase;
-      margin: 19px 0 0;
-      font-size: 9px;
-      font-weight: 620;
-    }
-
-    @keyframes assemble {
-      from { transform: scaleY(0.55); opacity: 0.55; }
-      to { transform: scaleY(1); opacity: 1; }
-    }
-
-    .experience-status {
-      position: absolute;
-      bottom: 18px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 30;
-      display: none;
-      align-items: center;
-      gap: 8px;
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--paper);
-      opacity: 0.7;
-    }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      border: 0;
-    }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 1020px) {
-      .resume-panel { width: min(380px, 40vw); }
-      .book-details { width: min(560px, 50vw); }
-    }
-
-    @media (max-width: 760px) {
-      .site-header { padding: 18px 16px; }
-      .wordmark { font-size: 8px; gap: 8px; letter-spacing: 0.14em; }
-      .wordmark__divider { width: 14px; }
-
-      .resume-panel {
-        top: auto;
-        bottom: 108px;
-        left: 0;
-        right: 0;
-        width: auto;
-        max-height: 38dvh;
-        padding: 40px 18px 12px;
-        background: linear-gradient(180deg, transparent, rgba(240, 226, 196, 0.96) 48px, var(--paper) 64px);
+      .room {
+        height: auto;
+        min-height: 100dvh;
+        grid-template-columns: 1fr;
+        overflow: visible;
       }
 
-      .resume-panel::before { display: none; }
-      .resume-panel h1 { font-size: clamp(34px, 11vw, 48px); max-width: 90%; }
-      .resume-intro { max-width: none; font-size: 14px; }
-
-      .browse-caption {
-        top: clamp(70px, 12vh, 100px);
-        bottom: auto;
-        right: 16px;
-        left: auto;
-        width: auto;
-        max-width: 55vw;
-        text-align: right;
+      .resume {
+        height: auto;
+        min-height: 70dvh;
+        border-right: none;
+        border-bottom: 1px solid rgba(61, 38, 26, 0.2);
       }
 
-      .browse-caption::before {
-        background: linear-gradient(225deg, rgba(63, 16, 24, 0.7), transparent 70%);
+      .resume-inner {
+        max-height: none;
       }
 
-      .shelf-arrow {
-        width: 42px;
-        height: 42px;
-        top: auto;
-        bottom: 56px;
-      }
-      .shelf-arrow--left { left: 16px; }
-      .shelf-arrow--right { right: 16px; }
-
-      .shelf-index {
-        display: block;
-        bottom: 64px;
-        left: 68px;
-        right: 68px;
+      .shelf-side {
+        height: auto;
+        min-height: 50dvh;
+        padding: 2.5rem 1.25rem 3rem;
       }
 
-      .shelf-index__ticks, .shelf-index__ticks button { height: 13px; }
-      .input-hint { display: none; }
-
-      .book-details {
-        width: 100%;
-        height: min(52dvh, 520px);
-        top: auto;
-        bottom: 0;
-        transform: translateY(100%);
-      }
-
-      .book-details::before {
-        background: linear-gradient(180deg, transparent, rgba(240, 226, 196, 0.94) 48px, var(--paper) 55px), var(--paper);
-        top: -48px;
-      }
-
-      .is-focused .book-details {
-        transform: translateY(0);
-      }
-
-      .book-details__inner {
-        padding: 10px 18px max(12px, env(safe-area-inset-bottom));
-        border-left: 0;
-        border-top: 1px solid rgba(37, 35, 31, 0.08);
-      }
-
-      .book-details h2 { font-size: clamp(32px, 9vw, 44px); }
+      .books-row { min-height: 230px; }
+      .book.wge { --book-h: 230px; --book-w: 48px; }
+      .book.seaf { --book-h: 215px; --book-w: 44px; }
     }
   </style>
 </head>
 <body>
-  <main class="press-experience" id="experience">
-    <canvas class="shelf-canvas" id="shelf-canvas" role="application" tabindex="0"
-      aria-label="Интерактивная 3D-полка. Тяни, крути колёсико или стрелки. Enter — открыть книгу."></canvas>
+  <div class="room">
+    <div class="carpet" aria-hidden="true"></div>
 
-    <header class="site-header">
-      <div class="wordmark" aria-label="Домашняя полка — интерактивная 3D библиотека">
-        <span>ДОМАШНЯЯ ПОЛКА</span>
-        <span class="wordmark__divider"></span>
-        <span>СОВЕТСКАЯ 3D БИБЛИОТЕКА</span>
-      </div>
-      <div class="edition-mark">
-        <span id="volume-count">— VOLUMES</span>
-        <span>01 КОВЁР · ПОЛКА</span>
-      </div>
-    </header>
+    <!-- LEFT: resume full height -->
+    <aside class="resume" aria-label="Резюме">
+      <div class="resume-inner">
+        <h1 class="name">Abanazar</h1>
 
-    <!-- LEFT: full resume -->
-    <aside class="resume-panel" aria-label="Резюме">
-      <div class="resume-scroll">
-        <p class="resume-eyebrow"><span>Резюме</span><span class="resume-eyebrow__line"></span><span>Abanazar</span></p>
-        <h1>Abanazar</h1>
-        <div class="resume-badges">
+        <div class="badges">
           <span>OSINT</span>
-          <span>Threat Intel</span>
+          <span>Dark Web / Threat Intelligence</span>
           <span>Golang</span>
           <span>netstalking</span>
         </div>
-        <p class="resume-intro">
+
+        <p class="intro">
           My nickname is Abanazar, and I speak at information security events with presentations on OSINT and dark
           web threat intelligence, lead my public of the russian speaking community of ancient netstalking
           (network study), and also actively educate Golang to the masses through the prism of the manifestos of
           its creators: Rob Pike and Brian Kernighan.
         </p>
 
-        <div class="resume-section">
+        <section class="section">
           <h2>Experience</h2>
 
-          <div class="exp">
-            <div class="exp-top">
+          <article class="job">
+            <div class="job-head">
               <a href="https://bi.zone/" target="_blank" rel="noopener noreferrer">BI.ZONE</a>
-              <span class="exp-date">Apr 2023 — Mar 2025</span>
+              <span class="job-date">Apr 2023 — Mar 2025 · 2 yrs</span>
             </div>
-            <div class="exp-role">Golang Developer</div>
+            <div class="job-role">Golang Developer</div>
             <ul>
-              <li>Tools for flagship EDR products — performance, UX, boxed server solutions</li>
-              <li>Code reviews, refactoring, testability (mocks + real components)</li>
-              <li>Project ownership from design to release of high-load services</li>
-              <li>CLI, PostgreSQL, Kafka, gORM; Docker for isolated product deploys</li>
-              <li>1st place GO.ZONE hackathon — AI assistant for InfoSec processes</li>
+              <li>Development of software tools for customers of flagship EDR products that provide high performance, instant access to the necessary functionality and ease of use on flagship boxed solutions on server hardware</li>
+              <li>Conducting code reviews in product teams and carrying out refactoring, which contributed to improving the quality and maintainability of projects. Also, improving the quality of the code helped teams better cover it with test scenarios by supporting both mock data implementation and real-world application of components.</li>
+              <li>Project management from the design stage to the successful release, each of which was a highly loaded service.</li>
+              <li>The use of CLI libraries to create user-friendly command interfaces, effective work with PostgreSQL, Kafka and ORM tools (gORM).</li>
+              <li>Configuring the interaction of Docker containers for deploying company products in a virtual isolated environment, followed by accessing them for integration and testing.</li>
+              <li>First place at GO.ZONE internal hackathon with AI assistant for information security business processes.</li>
             </ul>
-          </div>
+          </article>
 
-          <div class="exp">
-            <div class="exp-top">
+          <article class="job">
+            <div class="job-head">
               <a href="https://jetinfosystems.com/" target="_blank" rel="noopener noreferrer">Jet Information Systems</a>
-              <span class="exp-date">Jul 2021 — Feb 2023</span>
+              <span class="job-date">Jul 2021 — Feb 2023 · 1 yr 8 mo</span>
             </div>
-            <div class="exp-role">Information Security Analyst</div>
+            <div class="job-role">Information Security Analyst</div>
             <ul>
-              <li>Automation: parsers, crawlers, reporting</li>
-              <li>OSINT — media, Telegram, GitHub; leaked document analysis</li>
-              <li>External perimeter monitoring for corporate clients</li>
-              <li>CVE/CPE triage and criticality reports</li>
-              <li>Phishing resource identification at web scale</li>
+              <li>Development and implementation of tools for automating analytical processes, including parsers, crawlers, and reporting mechanisms.</li>
+              <li>Implementation of OSINT intelligence, including monitoring of media, telegram channels and GitHub repositories, search and analysis of hidden or leaked documents.</li>
+              <li>Performing predictive analysis and monitoring of the external perimeters of the corporate clients' network.</li>
+              <li>Development and implementation of innovative killer features to enhance the company's competitive advantage in the market.</li>
+              <li>Identification of vulnerabilities and exploits (CVE, CPE) and compilation of criticality reports for making operational decisions to improve protection.</li>
+              <li>Development and operation of a software solution for 100% identification and search of phishing resources on the web.</li>
             </ul>
-          </div>
+          </article>
 
-          <div class="exp">
-            <div class="exp-top">
+          <article class="job">
+            <div class="job-head">
               <a href="https://www.epam.com/" target="_blank" rel="noopener noreferrer">EPAM Systems Inc.</a>
-              <span class="exp-date">Nov 2020 — May 2021</span>
+              <span class="job-date">Nov 2020 — May 2021 · 7 mo</span>
             </div>
-            <div class="exp-role">Golang Developer</div>
+            <div class="job-role">Golang Developer</div>
             <ul>
-              <li>High-performance backend services in Go</li>
-              <li>gORM, gRPC microservices, Docker &amp; Kubernetes</li>
+              <li>Design and development of high-performance backend services in the Golang programming language.</li>
+              <li>Using standard practices and design patterns to create efficient and maintainable code.</li>
+              <li>Integration and use of the gORM ORM library for database management, query optimization and efficient data interaction.</li>
+              <li>Development of microservices using gRPC to ensure effective interaction between system components.</li>
+              <li>Containerization of applications using Docker to ensure consistency and portability in deployment.</li>
+              <li>Container management and orchestration using Kubernetes to ensure scalability and resource management.</li>
             </ul>
-          </div>
-        </div>
+          </article>
+        </section>
 
-        <div class="resume-section">
+        <section class="section">
           <h2>Skills</h2>
           <div class="skills">
-            <span>Golang</span><span>C++</span><span>ASM x86</span><span>Bash</span>
-            <span>PostgreSQL</span><span>MySQL</span><span>MongoDB</span>
-            <span>Kafka</span><span>RabbitMQ</span><span>Redis</span>
-            <span>Docker</span><span>Kubernetes</span><span>gRPC</span><span>GraphQL</span>
-            <span>GNU/Linux</span><span>Git</span><span>CI/CD</span><span>Grafana</span>
+            <span>Golang</span>
+            <span>C++</span>
+            <span>ASM x86</span>
+            <span>Bash</span>
+            <span>PostgreSQL</span>
+            <span>MySQL</span>
+            <span>MongoDB</span>
+            <span>SQL</span>
+            <span>NoSQL</span>
+            <span>gORM</span>
+            <span>Kafka</span>
+            <span>RabbitMQ</span>
+            <span>Redis</span>
+            <span>Docker</span>
+            <span>Kubernetes</span>
+            <span>gRPC</span>
+            <span>GraphQL</span>
+            <span>GNU/Linux</span>
+            <span>Git</span>
+            <span>GitHub</span>
+            <span>GitLab</span>
+            <span>CI/CD</span>
+            <span>Grafana</span>
           </div>
-        </div>
+        </section>
 
-        <div class="resume-links">
+        <div class="contacts">
           <a href="mailto:abanazar@inbox.ru">abanazar@inbox.ru</a>
           <a href="https://t.me/sur_NET" target="_blank" rel="noopener noreferrer">Telegram</a>
           <a href="https://github.com/Apanazar" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -1145,102 +855,63 @@
       </div>
     </aside>
 
-    <!-- Current book caption (mint-style) -->
-    <section class="browse-caption" id="browse-caption" aria-hidden="false">
-      <p class="eyebrow">
-        <span id="caption-index">01</span>
-        <span class="eyebrow__line"></span>
-        <span id="caption-total">08</span>
-      </p>
-      <h2 id="caption-title">—</h2>
-      <p class="browse-caption__author" id="caption-author">—</p>
-      <button type="button" class="inspect-button" id="inspect-button" disabled>
-        <span>Открыть том</span>
-        <span aria-hidden="true">↗</span>
-      </button>
+    <!-- RIGHT: shelf with two books -->
+    <section class="shelf-side" aria-label="Проекты">
+      <div class="bookshelf">
+        <div class="books-row">
+          <button type="button" class="book wge" data-project="wge" aria-label="WGE">
+            <span class="book-spine"><span>WGE</span></span>
+            <span class="book-pages" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="book seaf" data-project="seaf" aria-label="S.E.A.F.">
+            <span class="book-spine"><span>S.E.A.F.</span></span>
+            <span class="book-pages" aria-hidden="true"></span>
+          </button>
+        </div>
+        <div class="plank" aria-hidden="true"></div>
+      </div>
     </section>
+  </div>
 
-    <button type="button" class="shelf-arrow shelf-arrow--left" id="btn-prev" aria-label="Предыдущая книга" disabled>
-      <span class="arrow-icon arrow-icon--left"></span>
-    </button>
-    <button type="button" class="shelf-arrow shelf-arrow--right" id="btn-next" aria-label="Следующая книга">
-      <span class="arrow-icon arrow-icon--right"></span>
-    </button>
-
-    <nav class="shelf-index" aria-label="Позиция на полке">
-      <div class="shelf-index__ticks" id="shelf-ticks"></div>
-      <div class="input-hint" aria-hidden="true">
-        <span>DRAG</span><i></i><span>SCROLL</span><i></i><span>ARROW KEYS</span>
-      </div>
-    </nav>
-
-    <!-- Inspect panel -->
-    <aside class="book-details" id="book-details" aria-hidden="true" aria-label="Детали проекта">
-      <div class="book-details__inner">
-        <div class="book-details__top">
-          <div class="book-details__position">
-            <span id="details-index">01</span>
-            <span id="details-total">08</span>
-          </div>
-          <button type="button" class="close-inspect" id="close-inspect">Закрыть</button>
+  <!-- Project modal -->
+  <div class="modal-root" id="modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head">
+        <div>
+          <h2 id="modal-title">—</h2>
+          <p id="modal-sub">—</p>
         </div>
-        <div class="book-details__copy">
-          <h2 id="details-title">—</h2>
-          <p class="book-details__author" id="details-author">—</p>
-
-          <div class="carousel" id="carousel">
-            <div class="carousel-viewport" id="carousel-viewport">
-              <div class="carousel-placeholder" id="carousel-placeholder">
-                Скриншоты появятся здесь
-                <code id="carousel-path-hint">assets/projects/…</code>
-              </div>
-            </div>
-            <div class="carousel-nav">
-              <button type="button" id="carousel-prev" aria-label="Назад">←</button>
-              <span class="carousel-counter" id="carousel-counter">0 / 0</span>
-              <button type="button" id="carousel-next" aria-label="Вперёд">→</button>
+        <div class="modal-actions">
+          <a id="modal-github" href="#" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <button type="button" id="modal-close">Закрыть</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="carousel">
+          <div class="carousel-viewport" id="carousel-viewport">
+            <div class="carousel-empty" id="carousel-empty">
+              Скриншоты появятся здесь
+              <code id="carousel-hint">assets/projects/…</code>
             </div>
           </div>
-
-          <div class="readme" id="readme">
-            <div class="readme-loading">Листаю README…</div>
+          <div class="carousel-bar">
+            <button type="button" id="car-prev" aria-label="Назад">←</button>
+            <span id="car-count">0 / 0</span>
+            <button type="button" id="car-next" aria-label="Вперёд">→</button>
           </div>
         </div>
-        <div class="book-details__footer">
-          <a id="details-github" href="#" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+        <div class="readme" id="readme">
+          <div class="readme-status">Загрузка README…</div>
         </div>
       </div>
-    </aside>
-
-    <div class="loading-screen" id="loading-screen" aria-hidden="false">
-      <div class="loading-screen__mark" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </div>
-      <p>Собираю тома на полке…</p>
     </div>
+  </div>
 
-    <div class="sr-only" id="live-region" aria-live="polite"></div>
-  </main>
-
-  <script type="module">
-    import * as THREE from 'three';
-
-    /**
-     * Catalog — project books + decorative Soviet volumes.
-     * Project books: set `project: true`, repo, images[].
-     * Drop screenshots into assets/projects/<id>/ and list paths in images.
-     */
-    const CATALOG = [
-      {
-        id: 'wge',
+  <script>
+    const PROJECTS = {
+      wge: {
         title: 'WGE',
-        author: 'Wiki Graph Explorer',
-        spine: 'WGE',
-        color: '#1e3a5f',
-        foil: '#d4af37',
-        height: 1.18,
-        thickness: 0.42,
-        project: true,
+        subtitle: 'Wiki Graph Explorer',
         repo: 'Apanazar/WGE',
         branch: 'main',
         github: 'https://github.com/Apanazar/WGE',
@@ -1248,16 +919,9 @@
           // 'assets/projects/wge/1.jpg',
         ],
       },
-      {
-        id: 'seaf',
+      seaf: {
         title: 'S.E.A.F.',
-        author: 'Secure Encrypted Archive Format',
-        spine: 'S.E.A.F.',
-        color: '#1a4a3a',
-        foil: '#e8d5a3',
-        height: 1.08,
-        thickness: 0.38,
-        project: true,
+        subtitle: 'Secure Encrypted Archive Format',
         repo: 'Apanazar/seaf',
         branch: 'main',
         github: 'https://github.com/Apanazar/seaf',
@@ -1265,502 +929,107 @@
           // 'assets/projects/seaf/1.jpg',
         ],
       },
-      // Decorative atmosphere volumes (not inspectable as projects)
-      { id: 'd1', title: 'Ковёр', author: 'На стене', spine: 'КОВЁР', color: '#6b1d2a', foil: '#c9a227', height: 1.12, thickness: 0.32, project: false },
-      { id: 'd2', title: 'Нетсталкинг', author: 'sur.NET', spine: 'NET', color: '#2d4a3e', foil: '#e8d5a3', height: 1.0, thickness: 0.28, project: false },
-      { id: 'd3', title: 'OSINT', author: 'Полевые заметки', spine: 'OSINT', color: '#4a3060', foil: '#d4af37', height: 1.15, thickness: 0.35, project: false },
-      { id: 'd4', title: 'Rob Pike', author: 'Go Proverbs', spine: 'PIKE', color: '#7a3b1a', foil: '#f0e2c4', height: 0.96, thickness: 0.26, project: false },
-      { id: 'd5', title: 'Тёмная сеть', author: 'Threat Intel', spine: 'DARK', color: '#25231f', foil: '#a74735', height: 1.22, thickness: 0.4, project: false },
-      { id: 'd6', title: 'Домашний уют', author: 'Том I', spine: 'УЮТ', color: '#5c4033', foil: '#c9a227', height: 1.05, thickness: 0.3, project: false },
-    ];
+    };
 
-    // —— DOM ——
-    const experience = document.getElementById('experience');
-    const canvas = document.getElementById('shelf-canvas');
-    const captionTitle = document.getElementById('caption-title');
-    const captionAuthor = document.getElementById('caption-author');
-    const captionIndex = document.getElementById('caption-index');
-    const captionTotal = document.getElementById('caption-total');
-    const inspectBtn = document.getElementById('inspect-button');
-    const btnPrev = document.getElementById('btn-prev');
-    const btnNext = document.getElementById('btn-next');
-    const ticksEl = document.getElementById('shelf-ticks');
-    const liveRegion = document.getElementById('live-region');
-    const detailsTitle = document.getElementById('details-title');
-    const detailsAuthor = document.getElementById('details-author');
-    const detailsIndex = document.getElementById('details-index');
-    const detailsTotal = document.getElementById('details-total');
-    const detailsGithub = document.getElementById('details-github');
-    const closeInspect = document.getElementById('close-inspect');
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalSub = document.getElementById('modal-sub');
+    const modalGithub = document.getElementById('modal-github');
+    const modalClose = document.getElementById('modal-close');
     const readmeEl = document.getElementById('readme');
-    const carouselViewport = document.getElementById('carousel-viewport');
-    const carouselPlaceholder = document.getElementById('carousel-placeholder');
-    const carouselPathHint = document.getElementById('carousel-path-hint');
-    const carouselCounter = document.getElementById('carousel-counter');
-    const carouselPrev = document.getElementById('carousel-prev');
-    const carouselNext = document.getElementById('carousel-next');
-    const volumeCount = document.getElementById('volume-count');
+    const viewport = document.getElementById('carousel-viewport');
+    const empty = document.getElementById('carousel-empty');
+    const hint = document.getElementById('carousel-hint');
+    const carCount = document.getElementById('car-count');
+    const carPrev = document.getElementById('car-prev');
+    const carNext = document.getElementById('car-next');
 
-    const N = CATALOG.length;
-    volumeCount.textContent = `${String(N).padStart(2, '0')} VOLUMES`;
-    captionTotal.textContent = String(N).padStart(2, '0');
-    detailsTotal.textContent = String(N).padStart(2, '0');
-    ticksEl.style.setProperty('--book-count', N);
+    let active = null;
+    let carIdx = 0;
+    let carImgs = [];
+    let lastFocus = null;
+    const cache = new Map();
 
-    // —— State ——
-    let selected = 0;
-    let targetSelected = 0;
-    let focused = false;
-    let carouselIndex = 0;
-    let carouselImages = [];
-    const readmeCache = new Map();
+    function openProject(key) {
+      const p = PROJECTS[key];
+      if (!p) return;
+      active = p;
+      lastFocus = document.activeElement;
 
-    // Smooth scroll along shelf
-    let shelfScroll = 0;      // world X of focus point
-    let shelfScrollTarget = 0;
-    let dragPointerId = null;
-    let dragLastX = 0;
-    let dragMoved = false;
+      modalTitle.textContent = p.title;
+      modalSub.textContent = p.subtitle;
+      modalGithub.href = p.github;
+      hint.textContent = `assets/projects/${key}/1.jpg`;
 
-    // Book mesh data
-    const bookMeshes = [];
-    const bookBaseX = [];
-    let shelfGroup;
+      setupCarousel(p.images || []);
+      loadReadme(p);
 
-    // —— Three.js setup ——
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: true,
-      powerPreference: 'high-performance',
-    });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
-
-    const scene = new THREE.Scene();
-
-    const camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.1, 80);
-    // Warm editorial angle — slightly above, looking down at shelf
-    const camBrowse = { pos: new THREE.Vector3(0, 1.55, 5.6), look: new THREE.Vector3(0, 0.55, 0) };
-    const camFocus = { pos: new THREE.Vector3(0.9, 1.15, 3.2), look: new THREE.Vector3(0.2, 0.7, 0) };
-    camera.position.copy(camBrowse.pos);
-    let camLook = camBrowse.look.clone();
-    camera.lookAt(camLook);
-
-    // Lights — warm domestic lamp + soft fill
-    const ambient = new THREE.AmbientLight(0xffe2b8, 0.55);
-    scene.add(ambient);
-
-    const key = new THREE.DirectionalLight(0xffd9a0, 1.35);
-    key.position.set(2.5, 5.5, 4);
-    key.castShadow = true;
-    key.shadow.mapSize.set(2048, 2048);
-    key.shadow.camera.near = 1;
-    key.shadow.camera.far = 20;
-    key.shadow.camera.left = -6;
-    key.shadow.camera.right = 6;
-    key.shadow.camera.top = 4;
-    key.shadow.camera.bottom = -2;
-    key.shadow.bias = -0.0002;
-    scene.add(key);
-
-    const rim = new THREE.DirectionalLight(0xffb0a0, 0.35);
-    rim.position.set(-4, 2, -2);
-    scene.add(rim);
-
-    const lamp = new THREE.PointLight(0xffc878, 18, 14, 2);
-    lamp.position.set(0, 3.2, 2.2);
-    scene.add(lamp);
-
-    // —— Procedural textures ——
-    function makeCanvas(w, h) {
-      const c = document.createElement('canvas');
-      c.width = w;
-      c.height = h;
-      return c;
+      modal.hidden = false;
+      requestAnimationFrame(() => modal.classList.add('open'));
+      document.body.style.overflow = 'hidden';
+      modalClose.focus();
     }
 
-    function clothTexture(hex, foilHex, label, motif = 0) {
-      const w = 256, h = 512;
-      const c = makeCanvas(w, h);
-      const ctx = c.getContext('2d');
-
-      // base cloth
-      ctx.fillStyle = hex;
-      ctx.fillRect(0, 0, w, h);
-
-      // noise weave
-      for (let i = 0; i < 9000; i++) {
-        const x = Math.random() * w;
-        const y = Math.random() * h;
-        const a = 0.03 + Math.random() * 0.05;
-        ctx.fillStyle = Math.random() > 0.5
-          ? `rgba(255,255,255,${a})`
-          : `rgba(0,0,0,${a})`;
-        ctx.fillRect(x, y, 1, 1);
-      }
-
-      // edge darkening
-      const g = ctx.createLinearGradient(0, 0, w, 0);
-      g.addColorStop(0, 'rgba(0,0,0,0.28)');
-      g.addColorStop(0.12, 'rgba(0,0,0,0)');
-      g.addColorStop(0.88, 'rgba(0,0,0,0)');
-      g.addColorStop(1, 'rgba(0,0,0,0.22)');
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, w, h);
-
-      // foil bands
-      ctx.strokeStyle = foilHex;
-      ctx.globalAlpha = 0.85;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(w * 0.22, h * 0.18);
-      ctx.lineTo(w * 0.78, h * 0.18);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(w * 0.22, h * 0.82);
-      ctx.lineTo(w * 0.78, h * 0.82);
-      ctx.stroke();
-
-      // abstract foil motif (mint-like geometric)
-      ctx.globalAlpha = 0.9;
-      ctx.fillStyle = foilHex;
-      ctx.strokeStyle = foilHex;
-      ctx.lineWidth = 2.5;
-      const cx = w / 2, cy = h * 0.42;
-      if (motif % 4 === 0) {
-        ctx.beginPath();
-        ctx.arc(cx, cy, 28, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(cx, cy, 6, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(cx, cy + 28);
-        ctx.lineTo(cx, cy + 70);
-        ctx.stroke();
-      } else if (motif % 4 === 1) {
-        for (let i = 0; i < 5; i++) {
-          ctx.fillRect(cx - 22, cy - 30 + i * 12, 44, 3);
-        }
-      } else if (motif % 4 === 2) {
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - 36);
-        ctx.lineTo(cx + 30, cy + 20);
-        ctx.lineTo(cx - 30, cy + 20);
-        ctx.closePath();
-        ctx.stroke();
-      } else {
-        ctx.beginPath();
-        ctx.arc(cx, cy - 10, 22, Math.PI * 0.15, Math.PI * 0.85);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(cx, cy + 18, 22, -Math.PI * 0.85, -Math.PI * 0.15);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-
-      // vertical spine title
-      ctx.save();
-      ctx.translate(w / 2, h * 0.72);
-      ctx.rotate(-Math.PI / 2);
-      ctx.fillStyle = foilHex;
-      ctx.font = '600 28px "Newsreader", Georgia, serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.shadowColor = 'rgba(0,0,0,0.35)';
-      ctx.shadowBlur = 2;
-      ctx.fillText(label, 0, 0);
-      ctx.restore();
-
-      const tex = new THREE.CanvasTexture(c);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      tex.anisotropy = 8;
-      return tex;
+    function closeModal() {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(() => {
+        if (!modal.classList.contains('open')) modal.hidden = true;
+      }, 280);
+      if (lastFocus) lastFocus.focus();
+      active = null;
     }
 
-    function pageTexture() {
-      const c = makeCanvas(64, 256);
-      const ctx = c.getContext('2d');
-      ctx.fillStyle = '#f0e6d0';
-      ctx.fillRect(0, 0, 64, 256);
-      for (let y = 0; y < 256; y += 3) {
-        ctx.fillStyle = y % 6 === 0 ? '#e2d4b4' : '#efe4c8';
-        ctx.fillRect(0, y, 64, 2);
-      }
-      const tex = new THREE.CanvasTexture(c);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      return tex;
-    }
-
-    function woodTexture() {
-      const c = makeCanvas(512, 128);
-      const ctx = c.getContext('2d');
-      const grd = ctx.createLinearGradient(0, 0, 0, 128);
-      grd.addColorStop(0, '#6b4532');
-      grd.addColorStop(0.35, '#4a2e20');
-      grd.addColorStop(0.7, '#3b2418');
-      grd.addColorStop(1, '#2a1810');
-      ctx.fillStyle = grd;
-      ctx.fillRect(0, 0, 512, 128);
-      for (let i = 0; i < 80; i++) {
-        ctx.strokeStyle = `rgba(20,10,5,${0.04 + Math.random() * 0.08})`;
-        ctx.lineWidth = 1 + Math.random() * 2;
-        const y = Math.random() * 128;
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.bezierCurveTo(128, y + (Math.random() - 0.5) * 8, 320, y + (Math.random() - 0.5) * 10, 512, y);
-        ctx.stroke();
-      }
-      // top highlight
-      ctx.fillStyle = 'rgba(255,220,170,0.12)';
-      ctx.fillRect(0, 0, 512, 10);
-      const tex = new THREE.CanvasTexture(c);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-      return tex;
-    }
-
-    const pagesTex = pageTexture();
-    const woodTex = woodTexture();
-
-    // —— Build shelf & books ——
-    function buildScene() {
-      shelfGroup = new THREE.Group();
-      scene.add(shelfGroup);
-
-      // shelf plank
-      const shelfW = N * 0.55 + 2.4;
-      const plankGeo = new THREE.BoxGeometry(shelfW, 0.12, 1.15);
-      const plankMat = new THREE.MeshStandardMaterial({
-        map: woodTex,
-        roughness: 0.55,
-        metalness: 0.05,
-      });
-      const plank = new THREE.Mesh(plankGeo, plankMat);
-      plank.position.set(0, 0, 0);
-      plank.castShadow = true;
-      plank.receiveShadow = true;
-      shelfGroup.add(plank);
-
-      // front lip
-      const lip = new THREE.Mesh(
-        new THREE.BoxGeometry(shelfW, 0.06, 0.06),
-        plankMat
-      );
-      lip.position.set(0, 0.03, 0.56);
-      lip.castShadow = true;
-      shelfGroup.add(lip);
-
-      // underside shadow catcher (slight)
-      const catcher = new THREE.Mesh(
-        new THREE.PlaneGeometry(shelfW + 1.5, 3),
-        new THREE.ShadowMaterial({ opacity: 0.28 })
-      );
-      catcher.rotation.x = -Math.PI / 2;
-      catcher.position.y = -0.061;
-      catcher.receiveShadow = true;
-      shelfGroup.add(catcher);
-
-      // wall plane behind with carpet feel (subtle, canvas is transparent over CSS carpet)
-      const wall = new THREE.Mesh(
-        new THREE.PlaneGeometry(30, 16),
-        new THREE.MeshStandardMaterial({
-          color: 0x4a1824,
-          roughness: 0.95,
-          metalness: 0,
-          transparent: true,
-          opacity: 0.15,
-        })
-      );
-      wall.position.set(0, 2.2, -1.4);
-      scene.add(wall);
-
-      // place books
-      let x = -((N - 1) * 0.48) / 2;
-      CATALOG.forEach((book, i) => {
-        const depth = 0.78;
-        const height = 1.05 * book.height;
-        const thick = 0.34 * book.thickness * 2.2;
-
-        const spineTex = clothTexture(book.color, book.foil, book.spine, i);
-        const coverTex = clothTexture(book.color, book.foil, '', i + 2);
-
-        const materials = [
-          new THREE.MeshStandardMaterial({ map: pagesTex, roughness: 0.9 }), // +x pages
-          new THREE.MeshStandardMaterial({ map: spineTex, roughness: 0.78, metalness: 0.08 }), // -x spine (we'll rotate)
-          new THREE.MeshStandardMaterial({ color: book.color, roughness: 0.85 }), // +y top
-          new THREE.MeshStandardMaterial({ color: book.color, roughness: 0.85 }), // -y bottom
-          new THREE.MeshStandardMaterial({ map: coverTex, roughness: 0.78, metalness: 0.08 }), // +z front
-          new THREE.MeshStandardMaterial({ map: coverTex, roughness: 0.85 }), // -z back
-        ];
-
-        // Box: width=thickness (X), height=Y, depth=Z
-        const geo = new THREE.BoxGeometry(thick, height, depth);
-        // Fix materials order: we want spine on -X facing left when books stand
-        // Actually for books on shelf facing us: spine faces left (-X or +X depending on convention)
-        // Reorder: +x right pages, -x left spine, +z front cover
-        const mesh = new THREE.Mesh(geo, [
-          materials[0], // +X page edge
-          materials[1], // -X spine
-          materials[2],
-          materials[3],
-          materials[4], // +Z front
-          materials[5],
-        ]);
-
-        mesh.position.set(x, 0.06 + height / 2, 0.05);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        mesh.userData.index = i;
-        mesh.userData.baseY = mesh.position.y;
-        mesh.userData.baseZ = mesh.position.z;
-        mesh.userData.baseRotZ = (Math.random() - 0.5) * 0.028;
-        mesh.userData.baseRotY = (Math.random() - 0.5) * 0.03;
-        mesh.rotation.z = mesh.userData.baseRotZ;
-        mesh.rotation.y = mesh.userData.baseRotY;
-
-        shelfGroup.add(mesh);
-        bookMeshes.push(mesh);
-        bookBaseX.push(x);
-
-        x += thick + 0.06 + Math.random() * 0.02;
-      });
-
-      // re-center books on shelf
-      const mid = (bookBaseX[0] + bookBaseX[bookBaseX.length - 1]) / 2;
-      bookMeshes.forEach((m, i) => {
-        m.position.x -= mid;
-        bookBaseX[i] = m.position.x;
-      });
-
-      // rebuild plank width roughly around books
-      const span = Math.abs(bookBaseX[bookBaseX.length - 1] - bookBaseX[0]) + 1.6;
-      plank.scale.x = span / shelfW;
-      lip.scale.x = span / shelfW;
-    }
-
-    // —— UI ticks ——
-    function buildTicks() {
-      ticksEl.innerHTML = '';
-      CATALOG.forEach((book, i) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.setAttribute('aria-label', `Перейти к ${book.title}`);
-        if (book.project) b.classList.add('is-project');
-        b.innerHTML = '<span></span>';
-        b.addEventListener('click', () => goTo(i));
-        ticksEl.appendChild(b);
-      });
-    }
-
-    function updateChrome() {
-      const book = CATALOG[selected];
-      const idx = String(selected + 1).padStart(2, '0');
-      captionTitle.textContent = book.title;
-      captionAuthor.textContent = book.author;
-      captionIndex.textContent = idx;
-      detailsIndex.textContent = idx;
-      inspectBtn.disabled = !book.project;
-      inspectBtn.setAttribute('aria-label', book.project
-        ? `Открыть ${book.title}`
-        : 'Декоративный том');
-      btnPrev.disabled = selected <= 0;
-      btnNext.disabled = selected >= N - 1;
-
-      [...ticksEl.children].forEach((el, i) => {
-        el.classList.toggle('is-active', i === selected);
-        el.setAttribute('aria-current', i === selected ? 'true' : 'false');
-      });
-
-      liveRegion.textContent = `Выбрано: ${book.title} — ${book.author}`;
-      shelfScrollTarget = bookBaseX[selected] || 0;
-    }
-
-    function goTo(i) {
-      targetSelected = Math.max(0, Math.min(N - 1, i));
-      selected = targetSelected;
-      updateChrome();
-    }
-
-    function setFocused(on) {
-      const book = CATALOG[selected];
-      if (on && !book.project) return;
-      focused = on;
-      experience.classList.toggle('is-focused', focused);
-      document.getElementById('book-details').setAttribute('aria-hidden', focused ? 'false' : 'true');
-      document.getElementById('browse-caption').setAttribute('aria-hidden', focused ? 'true' : 'false');
-
-      if (focused) {
-        detailsTitle.textContent = book.title;
-        detailsAuthor.textContent = book.author;
-        detailsGithub.href = book.github || '#';
-        detailsGithub.style.display = book.github ? '' : 'none';
-        carouselPathHint.textContent = `assets/projects/${book.id}/1.jpg`;
-        setupCarousel(book.images || []);
-        loadReadme(book);
-      }
-    }
-
-    // —— Carousel / README ——
     function setupCarousel(images) {
-      carouselImages = images.filter(Boolean);
-      carouselIndex = 0;
-      carouselViewport.querySelectorAll('img').forEach((img) => img.remove());
+      carImgs = images.filter(Boolean);
+      carIdx = 0;
+      viewport.querySelectorAll('img').forEach((img) => img.remove());
 
-      if (!carouselImages.length) {
-        carouselPlaceholder.style.display = 'block';
-        carouselCounter.textContent = '0 / 0';
-        carouselPrev.disabled = true;
-        carouselNext.disabled = true;
+      if (!carImgs.length) {
+        empty.style.display = 'block';
+        carCount.textContent = '0 / 0';
+        carPrev.disabled = true;
+        carNext.disabled = true;
         return;
       }
 
-      carouselPlaceholder.style.display = 'none';
-      carouselImages.forEach((src, i) => {
+      empty.style.display = 'none';
+      carImgs.forEach((src, i) => {
         const img = document.createElement('img');
         img.src = src;
-        img.alt = `Скриншот ${i + 1}`;
+        img.alt = `${active.title} — ${i + 1}`;
         img.loading = 'lazy';
         if (i === 0) img.classList.add('active');
-        carouselViewport.appendChild(img);
+        viewport.appendChild(img);
       });
       updateCarousel();
     }
 
     function updateCarousel() {
-      const imgs = carouselViewport.querySelectorAll('img');
-      imgs.forEach((img, i) => img.classList.toggle('active', i === carouselIndex));
-      const t = carouselImages.length;
-      carouselCounter.textContent = t ? `${carouselIndex + 1} / ${t}` : '0 / 0';
-      carouselPrev.disabled = t <= 1;
-      carouselNext.disabled = t <= 1;
+      viewport.querySelectorAll('img').forEach((img, i) => {
+        img.classList.toggle('active', i === carIdx);
+      });
+      const t = carImgs.length;
+      carCount.textContent = t ? `${carIdx + 1} / ${t}` : '0 / 0';
+      carPrev.disabled = t <= 1;
+      carNext.disabled = t <= 1;
     }
 
-    function shiftCarousel(d) {
-      if (carouselImages.length <= 1) return;
-      carouselIndex = (carouselIndex + d + carouselImages.length) % carouselImages.length;
+    function shiftCar(d) {
+      if (carImgs.length <= 1) return;
+      carIdx = (carIdx + d + carImgs.length) % carImgs.length;
       updateCarousel();
     }
 
-    async function loadReadme(book) {
-      if (!book.repo) {
-        readmeEl.innerHTML = '<p class="readme-loading">Декоративный том с домашней полки. Не проект на GitHub.</p>';
+    async function loadReadme(p) {
+      if (cache.has(p.repo)) {
+        renderReadme(cache.get(p.repo), p);
         return;
       }
-      if (readmeCache.has(book.repo)) {
-        renderReadme(readmeCache.get(book.repo), book);
-        return;
-      }
-      readmeEl.innerHTML = '<div class="readme-loading">Листаю README с GitHub…</div>';
+      readmeEl.innerHTML = '<div class="readme-status">Загрузка README…</div>';
       const urls = [
-        `https://cdn.jsdelivr.net/gh/${book.repo}@${book.branch}/README.md`,
-        `https://raw.githubusercontent.com/${book.repo}/${book.branch}/README.md`,
+        `https://cdn.jsdelivr.net/gh/${p.repo}@${p.branch}/README.md`,
+        `https://raw.githubusercontent.com/${p.repo}/${p.branch}/README.md`,
       ];
       let text = null;
       for (const url of urls) {
@@ -1769,24 +1038,24 @@
           if (!res.ok) throw new Error(String(res.status));
           text = await res.text();
           break;
-        } catch (_) { /* try next */ }
+        } catch (_) {}
       }
       if (text == null) {
-        readmeEl.innerHTML = `<div class="readme-error">Не удалось загрузить README. <a href="${book.github}" target="_blank" rel="noopener">Открыть на GitHub</a></div>`;
+        readmeEl.innerHTML = `<div class="readme-status error">Не удалось загрузить README. <a href="${p.github}" target="_blank" rel="noopener">GitHub</a></div>`;
         return;
       }
-      readmeCache.set(book.repo, text);
-      renderReadme(text, book);
+      cache.set(p.repo, text);
+      renderReadme(text, p);
     }
 
-    function renderReadme(md, book) {
+    function renderReadme(md, p) {
       if (typeof marked === 'undefined') {
-        readmeEl.innerHTML = `<pre>${md.replace(/[&<>]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</pre>`;
+        readmeEl.innerHTML = `<pre>${md.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))}</pre>`;
         return;
       }
       marked.setOptions({ gfm: true, breaks: false });
       readmeEl.innerHTML = marked.parse(md);
-      const base = `https://raw.githubusercontent.com/${book.repo}/${book.branch}/`;
+      const base = `https://raw.githubusercontent.com/${p.repo}/${p.branch}/`;
       readmeEl.querySelectorAll('img').forEach((img) => {
         const src = img.getAttribute('src') || '';
         if (!/^https?:\/\//i.test(src) && !src.startsWith('data:')) {
@@ -1796,7 +1065,7 @@
       readmeEl.querySelectorAll('a').forEach((a) => {
         const href = a.getAttribute('href') || '';
         if (href && !/^https?:\/\//i.test(href) && !href.startsWith('#') && !href.startsWith('mailto:')) {
-          a.href = `https://github.com/${book.repo}/blob/${book.branch}/` + href.replace(/^\.\//, '');
+          a.href = `https://github.com/${p.repo}/blob/${p.branch}/` + href.replace(/^\.\//, '');
         }
         if (a.hostname && a.hostname !== location.hostname) {
           a.target = '_blank';
@@ -1805,193 +1074,22 @@
       });
     }
 
-    // —— Interaction ——
-    function onPointerDown(e) {
-      if (focused) return;
-      dragPointerId = e.pointerId;
-      dragLastX = e.clientX;
-      dragMoved = false;
-      canvas.setPointerCapture(e.pointerId);
-      canvas.classList.add('is-dragging');
-    }
-
-    function onPointerMove(e) {
-      if (dragPointerId !== e.pointerId) return;
-      const dx = e.clientX - dragLastX;
-      dragLastX = e.clientX;
-      if (Math.abs(dx) > 1) dragMoved = true;
-      // drag right → shelf scrolls left (browse next)
-      const worldDelta = -dx * 0.0065;
-      shelfScrollTarget += worldDelta;
-      // snap selection to nearest book while dragging
-      let nearest = 0;
-      let best = Infinity;
-      bookBaseX.forEach((bx, i) => {
-        const d = Math.abs(bx - shelfScrollTarget);
-        if (d < best) { best = d; nearest = i; }
-      });
-      if (nearest !== selected) {
-        selected = nearest;
-        targetSelected = nearest;
-        updateChrome();
-      }
-    }
-
-    function onPointerUp(e) {
-      if (dragPointerId !== e.pointerId) return;
-      dragPointerId = null;
-      canvas.classList.remove('is-dragging');
-      try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
-      // click without drag → inspect if project
-      if (!dragMoved) {
-        const hit = pickBook(e.clientX, e.clientY);
-        if (hit != null) {
-          goTo(hit);
-          if (CATALOG[hit].project) setFocused(true);
-        }
-      } else {
-        // settle on nearest
-        goTo(selected);
-      }
-    }
-
-    function pickBook(clientX, clientY) {
-      const rect = canvas.getBoundingClientRect();
-      const mouse = new THREE.Vector2(
-        ((clientX - rect.left) / rect.width) * 2 - 1,
-        -((clientY - rect.top) / rect.height) * 2 + 1
-      );
-      const raycaster = new THREE.Raycaster();
-      raycaster.setFromCamera(mouse, camera);
-      const hits = raycaster.intersectObjects(bookMeshes);
-      if (!hits.length) return null;
-      return hits[0].object.userData.index;
-    }
-
-    canvas.addEventListener('pointerdown', onPointerDown);
-    canvas.addEventListener('pointermove', onPointerMove);
-    canvas.addEventListener('pointerup', onPointerUp);
-    canvas.addEventListener('pointercancel', onPointerUp);
-
-    canvas.addEventListener('wheel', (e) => {
-      if (focused) return;
-      e.preventDefault();
-      const dir = Math.sign(e.deltaY);
-      goTo(selected + dir);
-    }, { passive: false });
-
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && focused) {
-        setFocused(false);
-        return;
-      }
-      if (focused) {
-        if (e.key === 'ArrowLeft') shiftCarousel(-1);
-        if (e.key === 'ArrowRight') shiftCarousel(1);
-        return;
-      }
-      if (e.key === 'ArrowLeft') goTo(selected - 1);
-      if (e.key === 'ArrowRight') goTo(selected + 1);
-      if (e.key === 'Enter') setFocused(true);
+    document.querySelectorAll('.book[data-project]').forEach((btn) => {
+      btn.addEventListener('click', () => openProject(btn.dataset.project));
     });
 
-    btnPrev.addEventListener('click', () => goTo(selected - 1));
-    btnNext.addEventListener('click', () => goTo(selected + 1));
-    inspectBtn.addEventListener('click', () => setFocused(true));
-    closeInspect.addEventListener('click', () => setFocused(false));
-    carouselPrev.addEventListener('click', () => shiftCarousel(-1));
-    carouselNext.addEventListener('click', () => shiftCarousel(1));
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+    modalClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
     });
-
-    // —— Animate ——
-    const clock = new THREE.Clock();
-
-    function animate() {
-      requestAnimationFrame(animate);
-      const dt = Math.min(clock.getDelta(), 0.05);
-      const t = clock.elapsedTime;
-
-      // smooth shelf scroll
-      shelfScroll += (shelfScrollTarget - shelfScroll) * (1 - Math.exp(-8 * dt));
-
-      // camera
-      const camTarget = focused ? camFocus : camBrowse;
-      // when browsing, camera tracks shelf slightly
-      const trackX = focused ? shelfScroll * 0.15 : shelfScroll * 0.35;
-      const desiredPos = camTarget.pos.clone();
-      desiredPos.x += trackX;
-      const desiredLook = camTarget.look.clone();
-      desiredLook.x += trackX;
-
-      camera.position.lerp(desiredPos, 1 - Math.exp(-3.2 * dt));
-      camLook.lerp(desiredLook, 1 - Math.exp(-3.2 * dt));
-      camera.lookAt(camLook);
-
-      // books — mint-style: selected pulls forward; inspect orbits cover toward camera
-      bookMeshes.forEach((mesh, i) => {
-        const isSel = i === selected;
-        const baseX = bookBaseX[i];
-
-        let pullZ = 0;
-        let liftY = 0;
-        let rotY = mesh.userData.baseRotY || 0;
-        let rotX = 0;
-        let scale = 1;
-
-        if (focused && isSel) {
-          pullZ = 1.05;
-          liftY = 0.12;
-          rotY = -0.72;
-          rotX = -0.1;
-          scale = 1.06;
-        } else if (focused && !isSel) {
-          pullZ = -0.2;
-          scale = 0.96;
-        } else if (isSel) {
-          pullZ = 0.32;
-          liftY = 0.045;
-          rotY = -0.1;
-        }
-
-        const breath = isSel && !focused ? Math.sin(t * 2.2) * 0.012 : 0;
-        const kPos = 1 - Math.exp(-9 * dt);
-        const kRot = 1 - Math.exp(-7 * dt);
-
-        mesh.position.x = baseX - shelfScroll;
-        mesh.position.y = THREE.MathUtils.lerp(mesh.position.y, mesh.userData.baseY + liftY + breath, kPos);
-        mesh.position.z = THREE.MathUtils.lerp(mesh.position.z, mesh.userData.baseZ + pullZ, kPos);
-        mesh.rotation.y = THREE.MathUtils.lerp(mesh.rotation.y, rotY, kRot);
-        mesh.rotation.x = THREE.MathUtils.lerp(mesh.rotation.x, rotX, kRot);
-        mesh.rotation.z = THREE.MathUtils.lerp(mesh.rotation.z, mesh.userData.baseRotZ, kRot);
-        const s = THREE.MathUtils.lerp(mesh.scale.x, scale, kPos);
-        mesh.scale.setScalar(s);
-      });
-
-      // gentle lamp flicker
-      lamp.intensity = 17 + Math.sin(t * 1.7) * 0.6 + Math.sin(t * 3.1) * 0.3;
-
-      renderer.render(scene, camera);
-    }
-
-    // —— Boot ——
-    buildScene();
-    buildTicks();
-    // start on first project book
-    const firstProject = CATALOG.findIndex((b) => b.project);
-    goTo(firstProject >= 0 ? firstProject : 0);
-    updateChrome();
-    animate();
-
-    // ready
-    requestAnimationFrame(() => {
-      experience.classList.add('is-ready');
-      document.getElementById('loading-screen').setAttribute('aria-hidden', 'true');
+    document.addEventListener('keydown', (e) => {
+      if (!modal.classList.contains('open')) return;
+      if (e.key === 'Escape') closeModal();
+      if (e.key === 'ArrowLeft') shiftCar(-1);
+      if (e.key === 'ArrowRight') shiftCar(1);
     });
+    carPrev.addEventListener('click', () => shiftCar(-1));
+    carNext.addEventListener('click', () => shiftCar(1));
   </script>
 </body>
 </html>
