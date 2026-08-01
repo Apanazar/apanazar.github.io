@@ -1,1529 +1,1997 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abanazar — Домашняя полка</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=PT+Sans:ital,wght@0,400;0,700;1,400&family=Press+Start+2P&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <style>
-        :root {
-            --wood-dark: #3e2723;
-            --wood-mid: #5d4037;
-            --wood-light: #8d6e63;
-            --wood-pale: #bcaaa4;
-            --carpet-red: #6b1d2a;
-            --carpet-deep: #4a1220;
-            --carpet-gold: #c9a227;
-            --carpet-cream: #e8d5a3;
-            --carpet-green: #2d4a3e;
-            --paper: #f3e6c8;
-            --paper-dark: #e8d4a8;
-            --ink: #1a120b;
-            --ink-soft: #3d2b1f;
-            --gold: #d4af37;
-            --lamp: #ffd27a;
-            --shadow: rgba(20, 8, 4, 0.45);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            min-height: 100%;
-        }
-
-        body {
-            font-family: 'PT Sans', system-ui, sans-serif;
-            color: var(--ink);
-            background: #1a0f0c;
-            overflow-x: hidden;
-        }
-
-        .room {
-            min-height: 100vh;
-            position: relative;
-            padding: 1.25rem;
-            background:
-                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 210, 122, 0.12), transparent 55%),
-                linear-gradient(180deg, #2a1814 0%, #1a0f0c 40%, #120a08 100%);
-        }
-
-        .room::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            background-color: #c4a574;
-            background-image:
-                radial-gradient(circle at 20% 30%, rgba(139, 90, 43, 0.15) 0 2px, transparent 3px),
-                radial-gradient(circle at 70% 60%, rgba(139, 90, 43, 0.12) 0 1px, transparent 2px),
-                linear-gradient(90deg, rgba(90, 55, 30, 0.06) 1px, transparent 1px),
-                linear-gradient(rgba(90, 55, 30, 0.05) 1px, transparent 1px);
-            background-size: 48px 48px, 32px 32px, 12px 12px, 12px 12px;
-            opacity: 0.35;
-            pointer-events: none;
-        }
-
-        .wall-carpet {
-            position: fixed;
-            top: 4%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: min(92vw, 1180px);
-            height: min(88vh, 820px);
-            z-index: 1;
-            border-radius: 6px;
-            box-shadow:
-                0 18px 50px rgba(0, 0, 0, 0.55),
-                inset 0 0 0 10px var(--carpet-deep),
-                inset 0 0 0 14px var(--carpet-gold),
-                inset 0 0 0 22px var(--carpet-deep);
-            background-color: var(--carpet-red);
-            background-image:
-                radial-gradient(ellipse 28% 35% at 50% 48%,
-                    var(--carpet-gold) 0%,
-                    transparent 42%),
-                radial-gradient(ellipse 22% 28% at 50% 48%,
-                    var(--carpet-deep) 0%,
-                    transparent 55%),
-                repeating-linear-gradient(45deg,
-                    transparent 0 18px,
-                    rgba(201, 162, 39, 0.18) 18px 19px,
-                    transparent 19px 36px),
-                repeating-linear-gradient(-45deg,
-                    transparent 0 18px,
-                    rgba(201, 162, 39, 0.14) 18px 19px,
-                    transparent 19px 36px),
-                repeating-linear-gradient(90deg,
-                    transparent 0 40px,
-                    rgba(45, 74, 62, 0.25) 40px 44px,
-                    transparent 44px 80px),
-                linear-gradient(180deg,
-                    #7a2432 0%,
-                    #5c1824 50%,
-                    #4a1220 100%);
-            pointer-events: none;
-            filter: saturate(0.95) contrast(1.05);
-        }
-
-        .wall-carpet::before {
-            content: '';
-            position: absolute;
-            inset: 28px;
-            border: 3px solid rgba(201, 162, 39, 0.55);
-            border-radius: 2px;
-            background:
-                repeating-linear-gradient(0deg,
-                    transparent 0 14px,
-                    rgba(232, 213, 163, 0.07) 14px 15px),
-                repeating-linear-gradient(90deg,
-                    transparent 0 14px,
-                    rgba(232, 213, 163, 0.06) 14px 15px);
-            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.25);
-        }
-
-        .wall-carpet::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(ellipse 70% 50% at 50% 20%, rgba(255, 220, 150, 0.12), transparent 60%),
-                linear-gradient(180deg, transparent 70%, rgba(0, 0, 0, 0.25) 100%);
-            border-radius: 6px;
-        }
-
-        .lamp-glow {
-            position: fixed;
-            top: -8%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60vw;
-            height: 40vh;
-            background: radial-gradient(ellipse at 50% 0%, rgba(255, 210, 122, 0.22), transparent 70%);
-            pointer-events: none;
-            z-index: 2;
-        }
-
-        .layout {
-            position: relative;
-            z-index: 5;
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
-            gap: 1.25rem;
-            align-items: stretch;
-            min-height: calc(100vh - 2.5rem);
-        }
-
-        .resume-panel {
-            background:
-                linear-gradient(145deg, #f7eccf 0%, var(--paper) 40%, var(--paper-dark) 100%);
-            border: 4px solid var(--wood-dark);
-            border-radius: 4px;
-            box-shadow:
-                0 0 0 3px var(--wood-mid),
-                0 0 0 6px var(--wood-dark),
-                8px 14px 32px var(--shadow),
-                inset 0 1px 0 rgba(255, 255, 255, 0.45);
-            display: flex;
-            flex-direction: column;
-            max-height: calc(100vh - 2.5rem);
-            overflow: hidden;
-            position: relative;
-        }
-
-        .resume-panel::before {
-            content: '';
-            position: absolute;
-            inset: 8px;
-            border: 1px solid rgba(93, 64, 55, 0.25);
-            border-radius: 2px;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .resume-header {
-            background: linear-gradient(180deg, #6d4c41 0%, var(--wood-dark) 100%);
-            color: var(--paper);
-            padding: 0.85rem 1.1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 3px solid var(--gold);
-            flex-shrink: 0;
-        }
-
-        .resume-header h1 {
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 1.75rem;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
-        }
-
-        .resume-header .subtitle {
-            font-size: 0.78rem;
-            opacity: 0.85;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-
-        .resume-scroll {
-            overflow-y: auto;
-            padding: 1.25rem 1.35rem 1.5rem;
-            flex: 1;
-            position: relative;
-            z-index: 2;
-        }
-
-        .resume-scroll::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        .resume-scroll::-webkit-scrollbar-track {
-            background: rgba(93, 64, 55, 0.12);
-        }
-
-        .resume-scroll::-webkit-scrollbar-thumb {
-            background: var(--wood-mid);
-            border-radius: 4px;
-            border: 2px solid var(--paper);
-        }
-
-        .badge-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-            margin-bottom: 1rem;
-        }
-
-        .badge {
-            display: inline-block;
-            font-size: 0.75rem;
-            padding: 0.28rem 0.65rem;
-            border-radius: 2px;
-            background: rgba(107, 29, 42, 0.12);
-            border: 1px solid rgba(107, 29, 42, 0.35);
-            color: var(--carpet-deep);
-            font-weight: 700;
-            letter-spacing: 0.02em;
-        }
-
-        .badge.blue {
-            background: rgba(45, 74, 62, 0.15);
-            border-color: rgba(45, 74, 62, 0.45);
-            color: var(--carpet-green);
-        }
-
-        .badge.gold {
-            background: rgba(201, 162, 39, 0.2);
-            border-color: rgba(201, 162, 39, 0.55);
-            color: #6b4e0a;
-        }
-
-        .intro {
-            font-size: 0.98rem;
-            line-height: 1.55;
-            color: var(--ink-soft);
-            margin-bottom: 1.4rem;
-            border-left: 3px solid var(--carpet-red);
-            padding-left: 0.9rem;
-        }
-
-        .section-title {
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 1.45rem;
-            font-weight: 700;
-            color: var(--carpet-deep);
-            margin: 1.5rem 0 0.85rem;
-            padding-bottom: 0.35rem;
-            border-bottom: 2px solid rgba(107, 29, 42, 0.25);
-            letter-spacing: 0.03em;
-        }
-
-        .experience-item {
-            margin-bottom: 1.35rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px dashed rgba(93, 64, 55, 0.25);
-        }
-
-        .experience-item:last-of-type {
-            border-bottom: none;
-        }
-
-        .exp-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-            gap: 0.35rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .exp-company {
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--ink);
-            text-decoration: none;
-        }
-
-        .exp-company:hover {
-            color: var(--carpet-red);
-            text-decoration: underline;
-        }
-
-        .exp-date {
-            font-size: 0.78rem;
-            color: #6b5344;
-            background: rgba(93, 64, 55, 0.08);
-            padding: 0.15rem 0.5rem;
-            border-radius: 2px;
-            border: 1px solid rgba(93, 64, 55, 0.15);
-        }
-
-        .exp-position {
-            font-weight: 700;
-            color: var(--carpet-red);
-            margin-bottom: 0.55rem;
-            font-size: 0.95rem;
-        }
-
-        .exp-desc {
-            list-style: none;
-            font-size: 0.9rem;
-            line-height: 1.45;
-            color: var(--ink-soft);
-        }
-
-        .exp-desc li {
-            position: relative;
-            padding-left: 1.1rem;
-            margin-bottom: 0.4rem;
-        }
-
-        .exp-desc li::before {
-            content: '◆';
-            position: absolute;
-            left: 0;
-            top: 0.15em;
-            font-size: 0.55rem;
-            color: var(--carpet-gold);
-        }
-
-        .skills {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-            margin-top: 0.5rem;
-        }
-
-        .skill {
-            font-size: 0.78rem;
-            padding: 0.3rem 0.65rem;
-            background: rgba(62, 39, 35, 0.08);
-            border: 1px solid rgba(62, 39, 35, 0.2);
-            border-radius: 2px;
-            color: var(--ink);
-        }
-
-        .footer {
-            margin-top: 1.5rem;
-            padding-top: 1rem;
-            border-top: 2px solid rgba(107, 29, 42, 0.2);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.55rem;
-        }
-
-        .footer a {
-            text-decoration: none;
-            color: var(--paper);
-            background: linear-gradient(180deg, #6d4c41, var(--wood-dark));
-            border: 1px solid var(--wood-dark);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
-            padding: 0.45rem 0.85rem;
-            font-size: 0.85rem;
-            border-radius: 2px;
-            transition: transform 0.12s ease, filter 0.12s ease;
-        }
-
-        .footer a:hover {
-            filter: brightness(1.12);
-            transform: translateY(-1px);
-        }
-
-        .shelf-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            min-height: 0;
-        }
-
-        .shelf-label {
-            text-align: center;
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: var(--paper);
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-            letter-spacing: 0.06em;
-            background: rgba(26, 15, 12, 0.35);
-            border: 1px solid rgba(201, 162, 39, 0.35);
-            padding: 0.45rem 0.75rem;
-            border-radius: 2px;
-            backdrop-filter: blur(4px);
-        }
-
-        .shelf-label small {
-            display: block;
-            font-family: 'PT Sans', sans-serif;
-            font-size: 0.72rem;
-            font-weight: 400;
-            opacity: 0.8;
-            letter-spacing: 0.04em;
-            margin-top: 0.15rem;
-        }
-
-        .bookshelf {
-            flex: 1;
-            background:
-                linear-gradient(90deg, rgba(0, 0, 0, 0.25), transparent 8%, transparent 92%, rgba(0, 0, 0, 0.25)),
-                linear-gradient(180deg, #4e342e 0%, var(--wood-dark) 100%);
-            border: 5px solid #2a1814;
-            border-radius: 3px;
-            box-shadow:
-                0 0 0 2px var(--wood-light),
-                10px 16px 36px var(--shadow),
-                inset 0 2px 8px rgba(0, 0, 0, 0.35);
-            padding: 1rem 0.85rem 0.85rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            gap: 0;
-            position: relative;
-            overflow: hidden;
-            min-height: 420px;
-        }
-
-        .bookshelf::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background:
-                repeating-linear-gradient(90deg,
-                    transparent 0 3px,
-                    rgba(255, 255, 255, 0.02) 3px 4px);
-            pointer-events: none;
-            opacity: 0.5;
-        }
-
-        .shelf-row {
-            position: relative;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            gap: 0.55rem;
-            padding: 0.5rem 0.4rem 0;
-            min-height: 190px;
-            z-index: 2;
-        }
-
-        .shelf-plank {
-            height: 18px;
-            background:
-                linear-gradient(180deg, #a1887f 0%, #6d4c41 35%, #4e342e 100%);
-            border-top: 2px solid rgba(255, 230, 200, 0.25);
-            border-bottom: 3px solid #1a0f0c;
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
-            margin: 0 -0.35rem;
-            position: relative;
-            z-index: 3;
-        }
-
-        .shelf-plank::after {
-            content: '';
-            position: absolute;
-            left: 8%;
-            right: 8%;
-            top: 4px;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.12);
-        }
-
-        .shelf-decor {
-            width: 28px;
-            height: 36px;
-            background: linear-gradient(180deg, #8d6e63, #5d4037);
-            border-radius: 2px 2px 1px 1px;
-            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
-            opacity: 0.7;
-            align-self: flex-end;
-            margin-bottom: 2px;
-        }
-
-        .shelf-decor.vase {
-            width: 22px;
-            height: 42px;
-            border-radius: 40% 40% 30% 30% / 20% 20% 60% 60%;
-            background:
-                radial-gradient(circle at 40% 30%, rgba(255, 255, 255, 0.2), transparent 50%),
-                linear-gradient(180deg, #c9a227, #6b1d2a 60%, #3e2723);
-        }
-
-        .shelf-decor.frame {
-            width: 34px;
-            height: 28px;
-            background:
-                linear-gradient(#d4af37, #a67c00) padding-box,
-                linear-gradient(#3e2723, #1a0f0c) border-box;
-            border: 3px solid transparent;
-            border-radius: 1px;
-            position: relative;
-        }
-
-        .shelf-decor.frame::after {
-            content: '';
-            position: absolute;
-            inset: 2px;
-            background: linear-gradient(135deg, #5d4037, #2d4a3e);
-        }
-
-        .book {
-            --book-h: 168px;
-            --book-w: 42px;
-            --spine: #6b1d2a;
-            --spine-light: #8b2a3a;
-            --spine-dark: #4a1220;
-            --page: #f0e6d0;
-            position: relative;
-            width: var(--book-w);
-            height: var(--book-h);
-            cursor: pointer;
-            transform-style: preserve-3d;
-            transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), filter 0.2s ease;
-            filter: drop-shadow(2px 4px 4px rgba(0, 0, 0, 0.35));
-            flex-shrink: 0;
-            border: none;
-            padding: 0;
-            background: transparent;
-            font: inherit;
-            color: inherit;
-        }
-
-        .book:hover,
-        .book:focus-visible {
-            transform: translateY(-18px) rotate(-2deg) scale(1.04);
-            filter: drop-shadow(4px 12px 12px rgba(0, 0, 0, 0.45));
-            outline: none;
-            z-index: 10;
-        }
-
-        .book:focus-visible .book-spine {
-            box-shadow: 0 0 0 2px var(--gold), inset 0 0 12px rgba(255, 255, 255, 0.1);
-        }
-
-        .book:active {
-            transform: translateY(-10px) scale(1.02);
-        }
-
-        .book-spine {
-            position: absolute;
-            inset: 0;
-            background:
-                linear-gradient(90deg,
-                    rgba(0, 0, 0, 0.35) 0%,
-                    transparent 18%,
-                    transparent 82%,
-                    rgba(0, 0, 0, 0.25) 100%),
-                linear-gradient(180deg, var(--spine-light) 0%, var(--spine) 40%, var(--spine-dark) 100%);
-            border-radius: 2px 3px 2px 1px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 4px 10px;
-            box-shadow:
-                inset 2px 0 0 rgba(255, 255, 255, 0.12),
-                inset -2px 0 0 rgba(0, 0, 0, 0.25);
-            overflow: hidden;
-        }
-
-        .book-spine::before {
-            content: '';
-            position: absolute;
-            top: 28%;
-            left: 15%;
-            right: 15%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.7), transparent);
-        }
-
-        .book-spine::after {
-            content: '';
-            position: absolute;
-            bottom: 22%;
-            left: 15%;
-            right: 15%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.55), transparent);
-        }
-
-        .book-title {
-            writing-mode: vertical-rl;
-            transform: rotate(180deg);
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-weight: 700;
-            font-size: 0.95rem;
-            letter-spacing: 0.12em;
-            color: var(--paper);
-            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
-            z-index: 1;
-            max-height: 72%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .book-mark {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            border: 1.5px solid rgba(212, 175, 55, 0.75);
-            background: radial-gradient(circle at 35% 35%, #ffe082, #c9a227 60%, #6b4e0a);
-            z-index: 1;
-            flex-shrink: 0;
-        }
-
-        .book-pages {
-            position: absolute;
-            top: 3px;
-            bottom: 3px;
-            right: -5px;
-            width: 5px;
-            background: repeating-linear-gradient(
-                180deg,
-                var(--page) 0 2px,
-                #d9cbb0 2px 3px
-            );
-            border-radius: 0 1px 1px 0;
-            box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2);
-        }
-
-        .book.wge {
-            --spine: #1e3a5f;
-            --spine-light: #2d5a8a;
-            --spine-dark: #0f2440;
-            --book-w: 46px;
-            --book-h: 178px;
-        }
-
-        .book.seaf {
-            --spine: #1a4a3a;
-            --spine-light: #2d6b52;
-            --spine-dark: #0d2e24;
-            --book-w: 40px;
-            --book-h: 162px;
-        }
-
-        .book.filler-1 {
-            --spine: #5c4033;
-            --spine-light: #7a5645;
-            --spine-dark: #3a2820;
-            --book-w: 32px;
-            --book-h: 150px;
-            cursor: default;
-            pointer-events: none;
-            opacity: 0.72;
-        }
-
-        .book.filler-2 {
-            --spine: #4a3060;
-            --spine-light: #6a4585;
-            --spine-dark: #2e1c40;
-            --book-w: 36px;
-            --book-h: 158px;
-            cursor: default;
-            pointer-events: none;
-            opacity: 0.72;
-        }
-
-        .book.filler-3 {
-            --spine: #7a3b1a;
-            --spine-light: #9a4f28;
-            --spine-dark: #4a220e;
-            --book-w: 30px;
-            --book-h: 145px;
-            cursor: default;
-            pointer-events: none;
-            opacity: 0.72;
-        }
-
-        .shelf-hint {
-            text-align: center;
-            font-size: 0.78rem;
-            color: rgba(243, 230, 200, 0.75);
-            padding: 0.35rem 0.5rem 0.15rem;
-            letter-spacing: 0.03em;
-        }
-
-        .modal-backdrop {
-            position: fixed;
-            inset: 0;
-            z-index: 100;
-            background: rgba(12, 6, 4, 0.72);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.25s ease, visibility 0.25s ease;
-        }
-
-        .modal-backdrop.open {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal {
-            width: min(920px, 100%);
-            max-height: min(90vh, 860px);
-            background:
-                linear-gradient(160deg, #f8efd6 0%, var(--paper) 50%, #e6d2a4 100%);
-            border: 5px solid var(--wood-dark);
-            border-radius: 4px;
-            box-shadow:
-                0 0 0 3px var(--wood-mid),
-                0 0 0 6px var(--wood-dark),
-                0 24px 60px rgba(0, 0, 0, 0.55);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transform: translateY(16px) scale(0.97);
-            transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-            position: relative;
-        }
-
-        .modal-backdrop.open .modal {
-            transform: translateY(0) scale(1);
-        }
-
-        .modal-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 1rem;
-            padding: 1rem 1.15rem;
-            background: linear-gradient(180deg, #6d4c41, var(--wood-dark));
-            color: var(--paper);
-            border-bottom: 3px solid var(--gold);
-            flex-shrink: 0;
-        }
-
-        .modal-header h2 {
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 1.55rem;
-            font-weight: 700;
-            letter-spacing: 0.03em;
-        }
-
-        .modal-header p {
-            font-size: 0.88rem;
-            opacity: 0.85;
-            margin-top: 0.2rem;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 0.45rem;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .modal-actions a,
-        .modal-close {
-            font-family: 'PT Sans', sans-serif;
-            font-size: 0.85rem;
-            border: 1px solid rgba(243, 230, 200, 0.35);
-            background: rgba(0, 0, 0, 0.2);
-            color: var(--paper);
-            padding: 0.4rem 0.7rem;
-            border-radius: 2px;
-            text-decoration: none;
-            cursor: pointer;
-            transition: background 0.15s ease;
-        }
-
-        .modal-actions a:hover,
-        .modal-close:hover {
-            background: rgba(0, 0, 0, 0.4);
-        }
-
-        .modal-body {
-            overflow-y: auto;
-            padding: 1.15rem 1.25rem 1.5rem;
-            flex: 1;
-        }
-
-        .modal-body::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        .modal-body::-webkit-scrollbar-thumb {
-            background: var(--wood-mid);
-            border-radius: 4px;
-        }
-
-        .carousel {
-            margin-bottom: 1.25rem;
-            background: rgba(62, 39, 35, 0.08);
-            border: 2px solid rgba(62, 39, 35, 0.2);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .carousel-viewport {
-            position: relative;
-            aspect-ratio: 16 / 9;
-            background:
-                linear-gradient(135deg, #3e2723 0%, #1a0f0c 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .carousel-viewport img {
-            max-width: 100%;
-            max-height: 100%;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            display: none;
-        }
-
-        .carousel-viewport img.active {
-            display: block;
-        }
-
-        .carousel-placeholder {
-            color: rgba(243, 230, 200, 0.55);
-            text-align: center;
-            padding: 1.5rem;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .carousel-placeholder code {
-            display: inline-block;
-            margin-top: 0.4rem;
-            font-size: 0.78rem;
-            color: var(--gold);
-            background: rgba(0, 0, 0, 0.25);
-            padding: 0.2rem 0.45rem;
-            border-radius: 2px;
-        }
-
-        .carousel-nav {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.5rem;
-            padding: 0.55rem 0.75rem;
-            background: rgba(62, 39, 35, 0.1);
-            border-top: 1px solid rgba(62, 39, 35, 0.15);
-        }
-
-        .carousel-nav button {
-            font-family: inherit;
-            background: linear-gradient(180deg, #6d4c41, var(--wood-dark));
-            color: var(--paper);
-            border: 1px solid var(--wood-dark);
-            padding: 0.35rem 0.75rem;
-            border-radius: 2px;
-            cursor: pointer;
-            font-size: 0.85rem;
-        }
-
-        .carousel-nav button:disabled {
-            opacity: 0.4;
-            cursor: default;
-        }
-
-        .carousel-nav button:not(:disabled):hover {
-            filter: brightness(1.1);
-        }
-
-        .carousel-counter {
-            font-size: 0.82rem;
-            color: var(--ink-soft);
-        }
-
-        .readme {
-            font-size: 0.95rem;
-            line-height: 1.55;
-            color: var(--ink-soft);
-        }
-
-        .readme-loading,
-        .readme-error {
-            padding: 1rem;
-            text-align: center;
-            color: var(--ink-soft);
-            font-style: italic;
-        }
-
-        .readme-error {
-            color: var(--carpet-red);
-        }
-
-        .readme h1, .readme h2, .readme h3, .readme h4 {
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            color: var(--carpet-deep);
-            margin: 1.1rem 0 0.5rem;
-            line-height: 1.25;
-        }
-
-        .readme h1 { font-size: 1.55rem; }
-        .readme h2 { font-size: 1.3rem; border-bottom: 1px solid rgba(107, 29, 42, 0.2); padding-bottom: 0.25rem; }
-        .readme h3 { font-size: 1.1rem; }
-
-        .readme p { margin: 0.65rem 0; }
-
-        .readme a {
-            color: var(--carpet-red);
-            text-decoration: underline;
-            text-underline-offset: 2px;
-        }
-
-        .readme ul, .readme ol {
-            margin: 0.5rem 0 0.5rem 1.25rem;
-        }
-
-        .readme li { margin-bottom: 0.3rem; }
-
-        .readme code {
-            font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
-            font-size: 0.85em;
-            background: rgba(62, 39, 35, 0.1);
-            padding: 0.1em 0.35em;
-            border-radius: 2px;
-        }
-
-        .readme pre {
-            background: #2a1814;
-            color: #f3e6c8;
-            padding: 0.85rem 1rem;
-            border-radius: 3px;
-            overflow-x: auto;
-            margin: 0.75rem 0;
-            border: 1px solid rgba(201, 162, 39, 0.25);
-        }
-
-        .readme pre code {
-            background: none;
-            padding: 0;
-            color: inherit;
-            font-size: 0.82rem;
-        }
-
-        .readme img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 2px;
-            border: 1px solid rgba(62, 39, 35, 0.2);
-            margin: 0.5rem 0;
-        }
-
-        .readme blockquote {
-            border-left: 3px solid var(--carpet-gold);
-            margin: 0.75rem 0;
-            padding: 0.35rem 0.85rem;
-            background: rgba(201, 162, 39, 0.08);
-            color: var(--ink-soft);
-        }
-
-        .readme table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 0.75rem 0;
-            font-size: 0.9rem;
-        }
-
-        .readme th, .readme td {
-            border: 1px solid rgba(62, 39, 35, 0.2);
-            padding: 0.4rem 0.55rem;
-            text-align: left;
-        }
-
-        .readme th {
-            background: rgba(62, 39, 35, 0.08);
-        }
-
-        .readme hr {
-            border: none;
-            border-top: 1px solid rgba(107, 29, 42, 0.25);
-            margin: 1rem 0;
-        }
-
-        @media (max-width: 900px) {
-            .layout {
-                grid-template-columns: 1fr;
-            }
-
-            .resume-panel {
-                max-height: none;
-            }
-
-            .resume-scroll {
-                max-height: none;
-                overflow: visible;
-            }
-
-            .bookshelf {
-                min-height: 320px;
-            }
-
-            .wall-carpet {
-                height: 100%;
-                opacity: 0.9;
-            }
-        }
-
-        @media (max-width: 520px) {
-            .room { padding: 0.65rem; }
-
-            .resume-header h1 { font-size: 1.4rem; }
-
-            .book {
-                --book-w: 34px;
-                --book-h: 140px;
-            }
-
-            .book.wge { --book-w: 38px; --book-h: 150px; }
-            .book.seaf { --book-w: 34px; --book-h: 138px; }
-
-            .shelf-row {
-                min-height: 160px;
-                gap: 0.35rem;
-            }
-
-            .modal-header {
-                flex-direction: column;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta name="theme-color" content="#4a1824" />
+  <title>Abanazar — Домашняя полка</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+  <style>
+    :root {
+      --paper: #f0e2c4;
+      --paper-deep: #e4d0a8;
+      --paper-light: #f7edd6;
+      --ink: #1f1510;
+      --ink-soft: rgba(31, 21, 16, 0.62);
+      --hairline: rgba(31, 21, 16, 0.22);
+      --accent: #8b1e2d;
+      --carpet: #6b1d2a;
+      --carpet-deep: #3f1018;
+      --gold: #c9a227;
+      --wood: #3b2418;
+      --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+      --sans: "Inter", Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--carpet-deep);
+      color: var(--ink);
+      font-family: var(--sans);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, a { font: inherit; color: inherit; }
+
+    /* ===== EXPERIENCE SHELL (mint layout) ===== */
+    .press-experience {
+      isolation: isolate;
+      width: 100%;
+      height: 100dvh;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(255, 220, 160, 0.14), transparent 42%),
+        radial-gradient(ellipse 90% 70% at 50% 100%, rgba(0, 0, 0, 0.35), transparent 55%),
+        linear-gradient(180deg, #5a2030 0%, #4a1824 40%, #2a0e14 100%);
+    }
+
+    /* Wall carpet pattern overlay */
+    .press-experience::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.55;
+      background-image:
+        /* outer frame */
+        linear-gradient(var(--carpet-deep), var(--carpet-deep)),
+        /* gold border ring simulation via layered pattern */
+        repeating-linear-gradient(45deg,
+          transparent 0 22px,
+          rgba(201, 162, 39, 0.12) 22px 23px,
+          transparent 23px 44px),
+        repeating-linear-gradient(-45deg,
+          transparent 0 22px,
+          rgba(201, 162, 39, 0.1) 22px 23px,
+          transparent 23px 44px),
+        repeating-linear-gradient(90deg,
+          transparent 0 48px,
+          rgba(45, 74, 62, 0.18) 48px 52px,
+          transparent 52px 96px),
+        radial-gradient(ellipse 35% 40% at 50% 45%,
+          rgba(201, 162, 39, 0.22),
+          transparent 55%),
+        linear-gradient(180deg, #7a2838, #5a1828 50%, #3f1018);
+      background-blend-mode: normal;
+      box-shadow: inset 0 0 0 14px var(--carpet-deep), inset 0 0 0 18px rgba(201, 162, 39, 0.45), inset 0 0 0 36px var(--carpet-deep);
+    }
+
+    .press-experience::after {
+      z-index: 14;
+      pointer-events: none;
+      content: "";
+      opacity: 0.16;
+      mix-blend-mode: multiply;
+      background-image:
+        radial-gradient(circle at 12% 31%, rgba(45, 35, 24, 0.12) 0 0.7px, transparent 0.8px),
+        radial-gradient(circle at 73% 69%, rgba(255, 255, 255, 0.9) 0 0.6px, transparent 0.7px);
+      background-size: 7px 9px, 11px 13px;
+      position: absolute;
+      inset: 0;
+    }
+
+    .shelf-canvas {
+      z-index: 1;
+      cursor: grab;
+      touch-action: none;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+      display: block;
+      position: absolute;
+      inset: 0;
+    }
+
+    .shelf-canvas.is-dragging { cursor: grabbing !important; }
+    .is-ready .shelf-canvas { opacity: 1; }
+
+    /* ===== HEADER ===== */
+    .site-header {
+      z-index: 20;
+      pointer-events: none;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 26px clamp(22px, 3.4vw, 56px);
+      display: flex;
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      color: var(--paper);
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+    }
+
+    .wordmark {
+      letter-spacing: 0.185em;
+      align-items: center;
+      gap: 13px;
+      font-size: 10px;
+      font-weight: 650;
+      line-height: 1;
+      display: flex;
+      text-transform: uppercase;
+    }
+
+    .wordmark__divider {
+      opacity: 0.45;
+      background: currentColor;
+      width: 28px;
+      height: 1px;
+    }
+
+    .edition-mark {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      font-size: 9px;
+      font-weight: 650;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    /* ===== LEFT: RESUME (mint left column role) ===== */
+    .resume-panel {
+      z-index: 16;
+      position: absolute;
+      top: clamp(72px, 12vh, 110px);
+      left: clamp(24px, 5.4vw, 92px);
+      width: min(430px, 36vw);
+      max-height: calc(100dvh - clamp(200px, 28vh, 280px));
+      overflow: hidden;
+      pointer-events: auto;
+      transition: opacity 0.42s, transform 0.52s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .resume-panel::before {
+      z-index: -1;
+      content: "";
+      pointer-events: none;
+      background: linear-gradient(90deg, rgba(240, 226, 196, 0.96) 0%, rgba(240, 226, 196, 0.88) 58%, rgba(240, 226, 196, 0) 100%);
+      position: absolute;
+      inset: -28px -48px -28px -40px;
+    }
+
+    .is-focused .resume-panel {
+      opacity: 0;
+      transform: translateX(-22px);
+      pointer-events: none;
+    }
+
+    .resume-scroll {
+      max-height: inherit;
+      overflow-y: auto;
+      padding-right: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--hairline) transparent;
+    }
+
+    .resume-scroll::-webkit-scrollbar { width: 6px; }
+    .resume-scroll::-webkit-scrollbar-thumb {
+      background: var(--hairline);
+      border-radius: 3px;
+    }
+
+    .resume-eyebrow {
+      color: var(--ink-soft);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 10px;
+      font-weight: 650;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .resume-eyebrow__line {
+      width: 28px;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.45;
+    }
+
+    .resume-panel h1 {
+      font-family: var(--serif);
+      letter-spacing: -0.045em;
+      font-size: clamp(37px, 4.4vw, 64px);
+      font-weight: 500;
+      line-height: 0.92;
+      color: var(--ink);
+    }
+
+    .resume-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 16px 0 14px;
+    }
+
+    .resume-badges span {
+      font-size: 10px;
+      font-weight: 650;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border: 1px solid var(--hairline);
+      padding: 4px 8px;
+      border-radius: 999px;
+      color: var(--ink-soft);
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .resume-intro {
+      font-family: var(--serif);
+      font-size: clamp(14px, 1.15vw, 17px);
+      line-height: 1.4;
+      color: var(--ink-soft);
+      max-width: 38ch;
+    }
+
+    .resume-section {
+      margin-top: 22px;
+    }
+
+    .resume-section h2 {
+      font-family: var(--sans);
+      font-size: 10px;
+      font-weight: 650;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .exp {
+      margin-bottom: 14px;
+    }
+
+    .exp-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .exp a {
+      font-family: var(--serif);
+      font-size: 17px;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--ink);
+      border-bottom: 1px solid transparent;
+    }
+
+    .exp a:hover { border-bottom-color: var(--ink); }
+
+    .exp-date {
+      font-size: 11px;
+      color: var(--ink-soft);
+      letter-spacing: 0.02em;
+    }
+
+    .exp-role {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 14px;
+      color: var(--accent);
+      margin: 2px 0 6px;
+    }
+
+    .exp ul {
+      list-style: none;
+      font-size: 12.5px;
+      line-height: 1.4;
+      color: var(--ink-soft);
+    }
+
+    .exp li {
+      position: relative;
+      padding-left: 12px;
+      margin-bottom: 4px;
+    }
+
+    .exp li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.55em;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+
+    .skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .skills span {
+      font-size: 11px;
+      padding: 3px 8px;
+      border: 1px solid var(--hairline);
+      border-radius: 2px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .resume-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--hairline);
+    }
+
+    .resume-links a {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      color: var(--ink);
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 1px;
+    }
+
+    .resume-links a:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ===== BROWSE CAPTION (current book) ===== */
+    .browse-caption {
+      z-index: 16;
+      isolation: isolate;
+      pointer-events: none;
+      width: min(360px, 32vw);
+      transition: opacity 0.42s, transform 0.52s cubic-bezier(0.22, 1, 0.36, 1);
+      position: absolute;
+      bottom: clamp(150px, 20vh, 210px);
+      right: clamp(24px, 5vw, 80px);
+      text-align: right;
+      color: var(--paper);
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+    }
+
+    .browse-caption::before {
+      z-index: -1;
+      content: "";
+      pointer-events: none;
+      background: linear-gradient(270deg, rgba(63, 16, 24, 0.75) 0%, rgba(63, 16, 24, 0.45) 55%, transparent 100%);
+      position: absolute;
+      inset: -28px -40px -24px -60px;
+    }
+
+    .is-focused .browse-caption {
+      opacity: 0;
+      transform: translateX(22px);
+    }
+
+    .browse-caption .eyebrow {
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 10px;
+      font-weight: 650;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      opacity: 0.85;
+      margin-bottom: 10px;
+    }
+
+    .eyebrow__line {
+      width: 28px;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.45;
+    }
+
+    .browse-caption h2 {
+      font-family: var(--serif);
+      letter-spacing: -0.04em;
+      margin: 0;
+      font-size: clamp(28px, 3.2vw, 48px);
+      font-weight: 500;
+      line-height: 0.95;
+    }
+
+    .browse-caption__author {
+      font-family: var(--serif);
+      font-style: italic;
+      margin: 12px 0 0;
+      font-size: 15px;
+      opacity: 0.85;
+    }
+
+    .inspect-button {
+      cursor: pointer;
+      pointer-events: auto;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid currentColor;
+      align-items: center;
+      gap: 16px;
+      margin-top: 18px;
+      margin-left: auto;
+      padding: 0 0 7px;
+      font-size: 10px;
+      font-weight: 620;
+      display: inline-flex;
+      color: var(--paper);
+    }
+
+    .inspect-button:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    .inspect-button span:last-child {
+      font-size: 14px;
+      font-weight: 420;
+      transition: transform 0.22s;
+    }
+
+    .inspect-button:not(:disabled):hover span:last-child {
+      transform: translate(2px, -2px);
+    }
+
+    /* ===== ARROWS ===== */
+    .shelf-arrow {
+      z-index: 17;
+      border: 1px solid rgba(240, 226, 196, 0.35);
+      cursor: pointer;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      background: rgba(240, 226, 196, 0.55);
+      border-radius: 50%;
+      place-items: center;
+      width: 50px;
+      height: 50px;
+      transition: opacity 0.26s, transform 0.26s, background-color 0.22s;
+      display: grid;
+      position: absolute;
+      top: 49%;
+      color: var(--ink);
+    }
+
+    .shelf-arrow:hover:not(:disabled) {
+      background: rgba(247, 237, 214, 0.88);
+      transform: scale(1.06);
+    }
+
+    .shelf-arrow:disabled {
+      cursor: default;
+      opacity: 0.25;
+    }
+
+    .is-focused .shelf-arrow {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .shelf-arrow--left { left: clamp(15px, 2.7vw, 44px); }
+    .shelf-arrow--right { right: clamp(15px, 2.7vw, 44px); }
+
+    .arrow-icon {
+      width: 12px;
+      height: 12px;
+      border-top: 1.5px solid currentColor;
+      border-right: 1.5px solid currentColor;
+      display: block;
+    }
+
+    .arrow-icon--left { transform: rotate(-135deg); margin-left: 3px; }
+    .arrow-icon--right { transform: rotate(45deg); margin-right: 3px; }
+
+    /* ===== INDEX ===== */
+    .shelf-index {
+      z-index: 19;
+      grid-template-columns: minmax(200px, 1fr) auto;
+      align-items: end;
+      gap: 38px;
+      transition: opacity 0.3s, transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+      display: grid;
+      position: absolute;
+      bottom: 28px;
+      left: clamp(24px, 5vw, 82px);
+      right: clamp(24px, 5vw, 82px);
+      color: var(--paper);
+    }
+
+    .is-focused .shelf-index {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+    }
+
+    .shelf-index__ticks {
+      display: grid;
+      grid-template-columns: repeat(var(--book-count, 8), 1fr);
+      align-items: end;
+      height: 21px;
+    }
+
+    .shelf-index__ticks button {
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      width: 100%;
+      height: 21px;
+      padding: 0;
+      display: block;
+      position: relative;
+    }
+
+    .shelf-index__ticks button::before {
+      content: "";
+      background: rgba(240, 226, 196, 0.35);
+      height: 1px;
+      position: absolute;
+      bottom: 4px;
+      left: 0;
+      right: 0;
+    }
+
+    .shelf-index__ticks button span {
+      z-index: 1;
+      background: var(--paper);
+      opacity: 0.48;
+      width: 1px;
+      height: 7px;
+      transition: height 0.22s, opacity 0.22s, width 0.22s;
+      position: absolute;
+      bottom: 1px;
+      right: 50%;
+    }
+
+    .shelf-index__ticks button:hover span,
+    .shelf-index__ticks button.is-active span {
+      opacity: 1;
+      width: 2px;
+      height: 18px;
+    }
+
+    .shelf-index__ticks button.is-project span {
+      background: var(--gold);
+    }
+
+    .input-hint {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 9px;
+      font-weight: 650;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      white-space: nowrap;
+    }
+
+    .input-hint i {
+      width: 14px;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.4;
+      font-style: normal;
+    }
+
+    /* ===== BOOK DETAILS (inspect panel) ===== */
+    .book-details {
+      z-index: 22;
+      opacity: 0;
+      pointer-events: none;
+      width: min(620px, 44vw);
+      height: 100%;
+      transition: opacity 0.42s 80ms, transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+      position: absolute;
+      top: 0;
+      right: 0;
+      transform: translateX(44px);
+      color: var(--ink);
+    }
+
+    .book-details::before {
+      z-index: -1;
+      content: "";
+      background:
+        linear-gradient(90deg, transparent, rgba(240, 226, 196, 0.82) 10%, var(--paper) 24%),
+        var(--paper);
+      position: absolute;
+      inset: 0;
+    }
+
+    .is-focused .book-details {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .book-details__inner {
+      border-left: 1px solid rgba(37, 35, 31, 0.08);
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      height: 100%;
+      padding: 24px clamp(24px, 3.5vw, 56px) 28px clamp(40px, 5vw, 80px);
+      display: grid;
+      gap: 0;
+    }
+
+    .book-details__top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .book-details__position {
+      letter-spacing: 0.14em;
+      align-items: center;
+      gap: 8px;
+      font-size: 9px;
+      font-weight: 620;
+      display: flex;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .book-details__position span:first-child::after {
+      content: "";
+      opacity: 0.28;
+      background: currentColor;
+      width: 34px;
+      height: 1px;
+      margin: 0 9px 3px 13px;
+      display: inline-block;
+    }
+
+    .close-inspect {
+      border: 1px solid var(--hairline);
+      background: transparent;
+      border-radius: 999px;
+      padding: 7px 14px;
+      font-size: 10px;
+      font-weight: 650;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .close-inspect:hover { background: rgba(0, 0, 0, 0.05); }
+
+    .book-details__copy {
+      scrollbar-width: thin;
+      scrollbar-color: var(--hairline) transparent;
+      align-self: stretch;
+      max-height: 100%;
+      min-height: 0;
+      padding: 18px 0 12px;
+      overflow-y: auto;
+    }
+
+    .book-details h2 {
+      text-wrap: balance;
+      max-width: 500px;
+      font-family: var(--serif);
+      letter-spacing: -0.055em;
+      margin: 0;
+      font-size: clamp(36px, 3.8vw, 58px);
+      font-weight: 500;
+      line-height: 0.94;
+    }
+
+    .book-details__author {
+      color: var(--ink-soft);
+      font-family: var(--serif);
+      margin: 12px 0 0;
+      font-size: 17px;
+      font-style: italic;
+    }
+
+    /* carousel */
+    .carousel {
+      margin: 22px 0 18px;
+      border: 1px solid var(--hairline);
+      border-radius: 2px;
+      overflow: hidden;
+      background: rgba(59, 36, 24, 0.06);
+    }
+
+    .carousel-viewport {
+      position: relative;
+      aspect-ratio: 16 / 10;
+      background: linear-gradient(145deg, #3b2418, #1f1510);
+      display: grid;
+      place-items: center;
+    }
+
+    .carousel-viewport img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: none;
+    }
+
+    .carousel-viewport img.active { display: block; }
+
+    .carousel-placeholder {
+      color: rgba(240, 226, 196, 0.55);
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 1rem;
+    }
+
+    .carousel-placeholder code {
+      display: block;
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--gold);
+    }
+
+    .carousel-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-top: 1px solid var(--hairline);
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .carousel-nav button {
+      border: 1px solid var(--hairline);
+      background: transparent;
+      padding: 4px 12px;
+      cursor: pointer;
+      font-size: 12px;
+      border-radius: 2px;
+    }
+
+    .carousel-nav button:disabled { opacity: 0.35; cursor: default; }
+    .carousel-nav button:not(:disabled):hover { background: rgba(0, 0, 0, 0.04); }
+
+    .carousel-counter {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--ink-soft);
+    }
+
+    .readme {
+      font-family: var(--serif);
+      font-size: clamp(14px, 1.1vw, 17px);
+      line-height: 1.42;
+      color: var(--ink-soft);
+    }
+
+    .readme-loading, .readme-error {
+      font-style: italic;
+      padding: 12px 0;
+    }
+
+    .readme-error { color: var(--accent); }
+
+    .readme h1, .readme h2, .readme h3 {
+      font-family: var(--serif);
+      color: var(--ink);
+      line-height: 1.15;
+      margin: 1.1em 0 0.4em;
+      letter-spacing: -0.02em;
+    }
+
+    .readme h1 { font-size: 1.45em; font-weight: 500; }
+    .readme h2 { font-size: 1.2em; font-weight: 500; border-bottom: 1px solid var(--hairline); padding-bottom: 0.2em; }
+    .readme h3 { font-size: 1.05em; font-weight: 500; }
+    .readme p { margin: 0.65em 0; }
+    .readme a { color: var(--accent); }
+    .readme ul, .readme ol { margin: 0.5em 0 0.5em 1.2em; }
+    .readme li { margin-bottom: 0.25em; }
+    .readme code {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.86em;
+      background: rgba(59, 36, 24, 0.08);
+      padding: 0.1em 0.35em;
+      border-radius: 2px;
+    }
+    .readme pre {
+      background: #1f1510;
+      color: var(--paper);
+      padding: 12px 14px;
+      overflow-x: auto;
+      border-radius: 2px;
+      margin: 0.8em 0;
+      font-size: 0.82em;
+    }
+    .readme pre code { background: none; padding: 0; color: inherit; }
+    .readme img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid var(--hairline);
+      margin: 0.5em 0;
+    }
+    .readme blockquote {
+      border-left: 2px solid var(--gold);
+      margin: 0.8em 0;
+      padding: 0.2em 0 0.2em 14px;
+      font-style: italic;
+    }
+    .readme hr {
+      border: none;
+      border-top: 1px solid var(--hairline);
+      margin: 1em 0;
+    }
+
+    .book-details__footer {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 12px;
+      border-top: 1px solid var(--hairline);
+    }
+
+    .book-details__footer a {
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 650;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-bottom: 1px solid currentColor;
+      padding-bottom: 3px;
+    }
+
+    .book-details__footer a:hover { color: var(--accent); }
+
+    /* ===== LOADING ===== */
+    .loading-screen {
+      z-index: 40;
+      background:
+        radial-gradient(circle at 50% 40%, rgba(201, 162, 39, 0.12), transparent 50%),
+        linear-gradient(180deg, #5a2030, #3f1018);
+      place-content: center;
+      justify-items: center;
+      transition: opacity 0.72s 0.12s, visibility 0.72s 0.12s;
+      display: grid;
+      position: absolute;
+      inset: 0;
+      color: var(--paper);
+    }
+
+    .is-ready .loading-screen {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-screen__mark {
+      align-items: flex-end;
+      gap: 5px;
+      height: 62px;
+      display: flex;
+    }
+
+    .loading-screen__mark span {
+      background: var(--paper);
+      width: 13px;
+      animation: 1.25s ease-in-out infinite alternate assemble;
+      display: block;
+    }
+
+    .loading-screen__mark span:first-child { height: 46px; }
+    .loading-screen__mark span:nth-child(2) { height: 59px; animation-delay: -0.42s; }
+    .loading-screen__mark span:nth-child(3) { height: 39px; animation-delay: -0.78s; }
+
+    .loading-screen p {
+      letter-spacing: 0.17em;
+      text-transform: uppercase;
+      margin: 19px 0 0;
+      font-size: 9px;
+      font-weight: 620;
+    }
+
+    @keyframes assemble {
+      from { transform: scaleY(0.55); opacity: 0.55; }
+      to { transform: scaleY(1); opacity: 1; }
+    }
+
+    .experience-status {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--paper);
+      opacity: 0.7;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1020px) {
+      .resume-panel { width: min(380px, 40vw); }
+      .book-details { width: min(560px, 50vw); }
+    }
+
+    @media (max-width: 760px) {
+      .site-header { padding: 18px 16px; }
+      .wordmark { font-size: 8px; gap: 8px; letter-spacing: 0.14em; }
+      .wordmark__divider { width: 14px; }
+
+      .resume-panel {
+        top: auto;
+        bottom: 108px;
+        left: 0;
+        right: 0;
+        width: auto;
+        max-height: 38dvh;
+        padding: 40px 18px 12px;
+        background: linear-gradient(180deg, transparent, rgba(240, 226, 196, 0.96) 48px, var(--paper) 64px);
+      }
+
+      .resume-panel::before { display: none; }
+      .resume-panel h1 { font-size: clamp(34px, 11vw, 48px); max-width: 90%; }
+      .resume-intro { max-width: none; font-size: 14px; }
+
+      .browse-caption {
+        top: clamp(70px, 12vh, 100px);
+        bottom: auto;
+        right: 16px;
+        left: auto;
+        width: auto;
+        max-width: 55vw;
+        text-align: right;
+      }
+
+      .browse-caption::before {
+        background: linear-gradient(225deg, rgba(63, 16, 24, 0.7), transparent 70%);
+      }
+
+      .shelf-arrow {
+        width: 42px;
+        height: 42px;
+        top: auto;
+        bottom: 56px;
+      }
+      .shelf-arrow--left { left: 16px; }
+      .shelf-arrow--right { right: 16px; }
+
+      .shelf-index {
+        display: block;
+        bottom: 64px;
+        left: 68px;
+        right: 68px;
+      }
+
+      .shelf-index__ticks, .shelf-index__ticks button { height: 13px; }
+      .input-hint { display: none; }
+
+      .book-details {
+        width: 100%;
+        height: min(52dvh, 520px);
+        top: auto;
+        bottom: 0;
+        transform: translateY(100%);
+      }
+
+      .book-details::before {
+        background: linear-gradient(180deg, transparent, rgba(240, 226, 196, 0.94) 48px, var(--paper) 55px), var(--paper);
+        top: -48px;
+      }
+
+      .is-focused .book-details {
+        transform: translateY(0);
+      }
+
+      .book-details__inner {
+        padding: 10px 18px max(12px, env(safe-area-inset-bottom));
+        border-left: 0;
+        border-top: 1px solid rgba(37, 35, 31, 0.08);
+      }
+
+      .book-details h2 { font-size: clamp(32px, 9vw, 44px); }
+    }
+  </style>
 </head>
 <body>
-    <div class="room">
-        <div class="wall-carpet" aria-hidden="true"></div>
-        <div class="lamp-glow" aria-hidden="true"></div>
+  <main class="press-experience" id="experience">
+    <canvas class="shelf-canvas" id="shelf-canvas" role="application" tabindex="0"
+      aria-label="Интерактивная 3D-полка. Тяни, крути колёсико или стрелки. Enter — открыть книгу."></canvas>
 
-        <div class="layout">
-            <!-- LEFT: RESUME -->
-            <aside class="resume-panel" aria-label="Резюме">
-                <div class="resume-header">
-                    <div>
-                        <h1>Abanazar</h1>
-                        <div class="subtitle">домашний кабинет · резюме</div>
-                    </div>
-                </div>
+    <header class="site-header">
+      <div class="wordmark" aria-label="Домашняя полка — интерактивная 3D библиотека">
+        <span>ДОМАШНЯЯ ПОЛКА</span>
+        <span class="wordmark__divider"></span>
+        <span>СОВЕТСКАЯ 3D БИБЛИОТЕКА</span>
+      </div>
+      <div class="edition-mark">
+        <span id="volume-count">— VOLUMES</span>
+        <span>01 КОВЁР · ПОЛКА</span>
+      </div>
+    </header>
 
-                <div class="resume-scroll">
-                    <div class="badge-row">
-                        <span class="badge blue">OSINT</span>
-                        <span class="badge">Dark Web / Threat Intelligence</span>
-                        <span class="badge gold">Golang</span>
-                        <span class="badge">netstalking</span>
-                    </div>
-
-                    <p class="intro">
-                        My nickname is Abanazar, and I speak at information security events with presentations on OSINT and dark
-                        web threat intelligence, lead my public of the russian speaking community of ancient netstalking
-                        (network study), and also actively educate Golang to the masses through the prism of the manifestos of
-                        its creators: Rob Pike and Brian Kernighan.
-                    </p>
-
-                    <h2 class="section-title">Experience</h2>
-
-                    <div class="experience-item">
-                        <div class="exp-header">
-                            <a href="https://bi.zone/" target="_blank" rel="noopener noreferrer" class="exp-company">BI.ZONE</a>
-                            <span class="exp-date">Apr 2023 — Mar 2025 · 2 yrs</span>
-                        </div>
-                        <div class="exp-position">Golang Developer</div>
-                        <ul class="exp-desc">
-                            <li>Development of software tools for customers of flagship EDR products that provide high performance, instant access to the necessary functionality and ease of use on flagship boxed solutions on server hardware</li>
-                            <li>Conducting code reviews in product teams and carrying out refactoring, which contributed to improving the quality and maintainability of projects. Also, improving the quality of the code helped teams better cover it with test scenarios by supporting both mock data implementation and real-world application of components.</li>
-                            <li>Project management from the design stage to the successful release, each of which was a highly loaded service.</li>
-                            <li>The use of CLI libraries to create user-friendly command interfaces, effective work with PostgreSQL, Kafka and ORM tools (gORM).</li>
-                            <li>Configuring the interaction of Docker containers for deploying company products in a virtual isolated environment, followed by accessing them for integration and testing.</li>
-                            <li>First place at GO.ZONE internal hackathon with AI assistant for information security business processes.</li>
-                        </ul>
-                    </div>
-
-                    <div class="experience-item">
-                        <div class="exp-header">
-                            <a href="https://jetinfosystems.com/" target="_blank" rel="noopener noreferrer" class="exp-company">Jet Information Systems</a>
-                            <span class="exp-date">Jul 2021 — Feb 2023 · 1 yr 8 mo</span>
-                        </div>
-                        <div class="exp-position">Information Security Analyst</div>
-                        <ul class="exp-desc">
-                            <li>Development and implementation of tools for automating analytical processes, including parsers, crawlers, and reporting mechanisms.</li>
-                            <li>Implementation of OSINT intelligence, including monitoring of media, telegram channels and GitHub repositories, search and analysis of hidden or leaked documents.</li>
-                            <li>Performing predictive analysis and monitoring of the external perimeters of the corporate clients' network.</li>
-                            <li>Development and implementation of innovative killer features to enhance the company's competitive advantage in the market.</li>
-                            <li>Identification of vulnerabilities and exploits (CVE, CPE) and compilation of criticality reports for making operational decisions to improve protection.</li>
-                            <li>Development and operation of a software solution for 100% identification and search of phishing resources on the web.</li>
-                        </ul>
-                    </div>
-
-                    <div class="experience-item">
-                        <div class="exp-header">
-                            <a href="https://www.epam.com/" target="_blank" rel="noopener noreferrer" class="exp-company">EPAM Systems Inc.</a>
-                            <span class="exp-date">Nov 2020 — May 2021 · 7 mo</span>
-                        </div>
-                        <div class="exp-position">Golang Developer</div>
-                        <ul class="exp-desc">
-                            <li>Design and development of high-performance backend services in the Golang programming language.</li>
-                            <li>Using standard practices and design patterns to create efficient and maintainable code.</li>
-                            <li>Integration and use of the gORM ORM library for database management, query optimization and efficient data interaction.</li>
-                            <li>Development of microservices using gRPC to ensure effective interaction between system components.</li>
-                            <li>Containerization of applications using Docker to ensure consistency and portability in deployment.</li>
-                            <li>Container management and orchestration using Kubernetes to ensure scalability and resource management.</li>
-                        </ul>
-                    </div>
-
-                    <h2 class="section-title">Skills</h2>
-                    <div class="skills">
-                        <span class="skill">Golang</span>
-                        <span class="skill">C++</span>
-                        <span class="skill">ASM x86</span>
-                        <span class="skill">Bash</span>
-                        <span class="skill">PostgreSQL</span>
-                        <span class="skill">MySQL</span>
-                        <span class="skill">MongoDB</span>
-                        <span class="skill">SQL</span>
-                        <span class="skill">NoSQL</span>
-                        <span class="skill">gORM</span>
-                        <span class="skill">Kafka</span>
-                        <span class="skill">RabbitMQ</span>
-                        <span class="skill">Redis</span>
-                        <span class="skill">Docker</span>
-                        <span class="skill">Kubernetes</span>
-                        <span class="skill">gRPC</span>
-                        <span class="skill">GraphQL</span>
-                        <span class="skill">GNU/Linux</span>
-                        <span class="skill">Git</span>
-                        <span class="skill">GitHub</span>
-                        <span class="skill">GitLab</span>
-                        <span class="skill">CI/CD</span>
-                        <span class="skill">Grafana</span>
-                    </div>
-
-                    <div class="footer">
-                        <a href="mailto:abanazar@inbox.ru">abanazar@inbox.ru</a>
-                        <a href="https://t.me/sur_NET" target="_blank" rel="noopener noreferrer">ꜱᴜʀ.ɴᴇᴛꜱᴛᴀʟᴋɪɴɢ</a>
-                        <a href="https://github.com/Apanazar" target="_blank" rel="noopener noreferrer">GitHub</a>
-                    </div>
-                </div>
-            </aside>
-
-            <!-- RIGHT: BOOKSHELF -->
-            <section class="shelf-panel" aria-label="Полка проектов">
-                <div class="shelf-label">
-                    Книжная полка
-                    <small>проекты с GitHub — нажми на книгу</small>
-                </div>
-
-                <div class="bookshelf">
-                    <div class="shelf-row" id="shelf-top">
-                        <div class="shelf-decor frame" title="" aria-hidden="true"></div>
-                        <button type="button" class="book wge" data-project="wge" aria-label="Открыть проект WGE">
-                            <span class="book-spine">
-                                <span class="book-mark" aria-hidden="true"></span>
-                                <span class="book-title">WGE</span>
-                            </span>
-                            <span class="book-pages" aria-hidden="true"></span>
-                        </button>
-                        <button type="button" class="book seaf" data-project="seaf" aria-label="Открыть проект S.E.A.F.">
-                            <span class="book-spine">
-                                <span class="book-mark" aria-hidden="true"></span>
-                                <span class="book-title">S.E.A.F.</span>
-                            </span>
-                            <span class="book-pages" aria-hidden="true"></span>
-                        </button>
-                        <div class="book filler-1" aria-hidden="true">
-                            <span class="book-spine">
-                                <span class="book-mark"></span>
-                                <span class="book-title">···</span>
-                            </span>
-                            <span class="book-pages"></span>
-                        </div>
-                        <div class="book filler-2" aria-hidden="true">
-                            <span class="book-spine">
-                                <span class="book-mark"></span>
-                                <span class="book-title">···</span>
-                            </span>
-                            <span class="book-pages"></span>
-                        </div>
-                        <div class="shelf-decor vase" aria-hidden="true"></div>
-                    </div>
-                    <div class="shelf-plank" aria-hidden="true"></div>
-
-                    <div class="shelf-row" id="shelf-bottom">
-                        <div class="book filler-3" aria-hidden="true">
-                            <span class="book-spine">
-                                <span class="book-mark"></span>
-                                <span class="book-title">···</span>
-                            </span>
-                            <span class="book-pages"></span>
-                        </div>
-                        <div class="book filler-2" aria-hidden="true" style="--book-h: 148px; --book-w: 28px;">
-                            <span class="book-spine">
-                                <span class="book-mark"></span>
-                                <span class="book-title">···</span>
-                            </span>
-                            <span class="book-pages"></span>
-                        </div>
-                        <div class="book filler-1" aria-hidden="true" style="--book-h: 155px; --book-w: 34px;">
-                            <span class="book-spine">
-                                <span class="book-mark"></span>
-                                <span class="book-title">···</span>
-                            </span>
-                            <span class="book-pages"></span>
-                        </div>
-                        <div class="shelf-decor" aria-hidden="true"></div>
-                    </div>
-                    <div class="shelf-plank" aria-hidden="true"></div>
-
-                    <p class="shelf-hint">достань книгу с полки →</p>
-                </div>
-            </section>
+    <!-- LEFT: full resume -->
+    <aside class="resume-panel" aria-label="Резюме">
+      <div class="resume-scroll">
+        <p class="resume-eyebrow"><span>Резюме</span><span class="resume-eyebrow__line"></span><span>Abanazar</span></p>
+        <h1>Abanazar</h1>
+        <div class="resume-badges">
+          <span>OSINT</span>
+          <span>Threat Intel</span>
+          <span>Golang</span>
+          <span>netstalking</span>
         </div>
+        <p class="resume-intro">
+          My nickname is Abanazar, and I speak at information security events with presentations on OSINT and dark
+          web threat intelligence, lead my public of the russian speaking community of ancient netstalking
+          (network study), and also actively educate Golang to the masses through the prism of the manifestos of
+          its creators: Rob Pike and Brian Kernighan.
+        </p>
+
+        <div class="resume-section">
+          <h2>Experience</h2>
+
+          <div class="exp">
+            <div class="exp-top">
+              <a href="https://bi.zone/" target="_blank" rel="noopener noreferrer">BI.ZONE</a>
+              <span class="exp-date">Apr 2023 — Mar 2025</span>
+            </div>
+            <div class="exp-role">Golang Developer</div>
+            <ul>
+              <li>Tools for flagship EDR products — performance, UX, boxed server solutions</li>
+              <li>Code reviews, refactoring, testability (mocks + real components)</li>
+              <li>Project ownership from design to release of high-load services</li>
+              <li>CLI, PostgreSQL, Kafka, gORM; Docker for isolated product deploys</li>
+              <li>1st place GO.ZONE hackathon — AI assistant for InfoSec processes</li>
+            </ul>
+          </div>
+
+          <div class="exp">
+            <div class="exp-top">
+              <a href="https://jetinfosystems.com/" target="_blank" rel="noopener noreferrer">Jet Information Systems</a>
+              <span class="exp-date">Jul 2021 — Feb 2023</span>
+            </div>
+            <div class="exp-role">Information Security Analyst</div>
+            <ul>
+              <li>Automation: parsers, crawlers, reporting</li>
+              <li>OSINT — media, Telegram, GitHub; leaked document analysis</li>
+              <li>External perimeter monitoring for corporate clients</li>
+              <li>CVE/CPE triage and criticality reports</li>
+              <li>Phishing resource identification at web scale</li>
+            </ul>
+          </div>
+
+          <div class="exp">
+            <div class="exp-top">
+              <a href="https://www.epam.com/" target="_blank" rel="noopener noreferrer">EPAM Systems Inc.</a>
+              <span class="exp-date">Nov 2020 — May 2021</span>
+            </div>
+            <div class="exp-role">Golang Developer</div>
+            <ul>
+              <li>High-performance backend services in Go</li>
+              <li>gORM, gRPC microservices, Docker &amp; Kubernetes</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="resume-section">
+          <h2>Skills</h2>
+          <div class="skills">
+            <span>Golang</span><span>C++</span><span>ASM x86</span><span>Bash</span>
+            <span>PostgreSQL</span><span>MySQL</span><span>MongoDB</span>
+            <span>Kafka</span><span>RabbitMQ</span><span>Redis</span>
+            <span>Docker</span><span>Kubernetes</span><span>gRPC</span><span>GraphQL</span>
+            <span>GNU/Linux</span><span>Git</span><span>CI/CD</span><span>Grafana</span>
+          </div>
+        </div>
+
+        <div class="resume-links">
+          <a href="mailto:abanazar@inbox.ru">abanazar@inbox.ru</a>
+          <a href="https://t.me/sur_NET" target="_blank" rel="noopener noreferrer">Telegram</a>
+          <a href="https://github.com/Apanazar" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Current book caption (mint-style) -->
+    <section class="browse-caption" id="browse-caption" aria-hidden="false">
+      <p class="eyebrow">
+        <span id="caption-index">01</span>
+        <span class="eyebrow__line"></span>
+        <span id="caption-total">08</span>
+      </p>
+      <h2 id="caption-title">—</h2>
+      <p class="browse-caption__author" id="caption-author">—</p>
+      <button type="button" class="inspect-button" id="inspect-button" disabled>
+        <span>Открыть том</span>
+        <span aria-hidden="true">↗</span>
+      </button>
+    </section>
+
+    <button type="button" class="shelf-arrow shelf-arrow--left" id="btn-prev" aria-label="Предыдущая книга" disabled>
+      <span class="arrow-icon arrow-icon--left"></span>
+    </button>
+    <button type="button" class="shelf-arrow shelf-arrow--right" id="btn-next" aria-label="Следующая книга">
+      <span class="arrow-icon arrow-icon--right"></span>
+    </button>
+
+    <nav class="shelf-index" aria-label="Позиция на полке">
+      <div class="shelf-index__ticks" id="shelf-ticks"></div>
+      <div class="input-hint" aria-hidden="true">
+        <span>DRAG</span><i></i><span>SCROLL</span><i></i><span>ARROW KEYS</span>
+      </div>
+    </nav>
+
+    <!-- Inspect panel -->
+    <aside class="book-details" id="book-details" aria-hidden="true" aria-label="Детали проекта">
+      <div class="book-details__inner">
+        <div class="book-details__top">
+          <div class="book-details__position">
+            <span id="details-index">01</span>
+            <span id="details-total">08</span>
+          </div>
+          <button type="button" class="close-inspect" id="close-inspect">Закрыть</button>
+        </div>
+        <div class="book-details__copy">
+          <h2 id="details-title">—</h2>
+          <p class="book-details__author" id="details-author">—</p>
+
+          <div class="carousel" id="carousel">
+            <div class="carousel-viewport" id="carousel-viewport">
+              <div class="carousel-placeholder" id="carousel-placeholder">
+                Скриншоты появятся здесь
+                <code id="carousel-path-hint">assets/projects/…</code>
+              </div>
+            </div>
+            <div class="carousel-nav">
+              <button type="button" id="carousel-prev" aria-label="Назад">←</button>
+              <span class="carousel-counter" id="carousel-counter">0 / 0</span>
+              <button type="button" id="carousel-next" aria-label="Вперёд">→</button>
+            </div>
+          </div>
+
+          <div class="readme" id="readme">
+            <div class="readme-loading">Листаю README…</div>
+          </div>
+        </div>
+        <div class="book-details__footer">
+          <a id="details-github" href="#" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+        </div>
+      </div>
+    </aside>
+
+    <div class="loading-screen" id="loading-screen" aria-hidden="false">
+      <div class="loading-screen__mark" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <p>Собираю тома на полке…</p>
     </div>
 
-    <!-- PROJECT MODAL -->
-    <div class="modal-backdrop" id="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
-        <div class="modal">
-            <div class="modal-header">
-                <div>
-                    <h2 id="modal-title">Проект</h2>
-                    <p id="modal-subtitle"></p>
-                </div>
-                <div class="modal-actions">
-                    <a id="modal-github" href="#" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
-                    <button type="button" class="modal-close" id="modal-close" aria-label="Закрыть">Закрыть</button>
-                </div>
-            </div>
-            <div class="modal-body">
-                <div class="carousel" id="carousel">
-                    <div class="carousel-viewport" id="carousel-viewport">
-                        <div class="carousel-placeholder" id="carousel-placeholder">
-                            Скриншоты появятся здесь<br>
-                            <code id="carousel-path-hint">assets/projects/…</code>
-                        </div>
-                    </div>
-                    <div class="carousel-nav">
-                        <button type="button" id="carousel-prev" aria-label="Предыдущее фото">←</button>
-                        <span class="carousel-counter" id="carousel-counter">0 / 0</span>
-                        <button type="button" id="carousel-next" aria-label="Следующее фото">→</button>
-                    </div>
-                </div>
-                <div class="readme" id="readme">
-                    <div class="readme-loading">Листаю README с GitHub…</div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="sr-only" id="live-region" aria-live="polite"></div>
+  </main>
 
-    <script>
-        const PROJECTS = {
-            wge: {
-                id: 'wge',
-                title: 'WGE',
-                subtitle: 'Wiki Graph Explorer',
-                repo: 'Apanazar/WGE',
-                branch: 'main',
-                github: 'https://github.com/Apanazar/WGE',
-                images: [
-                    // 'assets/projects/wge/1.jpg',
-                    // 'assets/projects/wge/2.jpg',
-                ],
-            },
-            seaf: {
-                id: 'seaf',
-                title: 'S.E.A.F.',
-                subtitle: 'Secure Encrypted Archive Format',
-                repo: 'Apanazar/seaf',
-                branch: 'main',
-                github: 'https://github.com/Apanazar/seaf',
-                images: [
-                    // 'assets/projects/seaf/1.jpg',
-                    // 'assets/projects/seaf/2.jpg',
-                ],
-            },
-        };
+  <script type="module">
+    import * as THREE from 'three';
 
-        const backdrop = document.getElementById('modal-backdrop');
-        const modalTitle = document.getElementById('modal-title');
-        const modalSubtitle = document.getElementById('modal-subtitle');
-        const modalGithub = document.getElementById('modal-github');
-        const modalClose = document.getElementById('modal-close');
-        const readmeEl = document.getElementById('readme');
-        const carouselViewport = document.getElementById('carousel-viewport');
-        const carouselPlaceholder = document.getElementById('carousel-placeholder');
-        const carouselPathHint = document.getElementById('carousel-path-hint');
-        const carouselCounter = document.getElementById('carousel-counter');
-        const btnPrev = document.getElementById('carousel-prev');
-        const btnNext = document.getElementById('carousel-next');
+    /**
+     * Catalog — project books + decorative Soviet volumes.
+     * Project books: set `project: true`, repo, images[].
+     * Drop screenshots into assets/projects/<id>/ and list paths in images.
+     */
+    const CATALOG = [
+      {
+        id: 'wge',
+        title: 'WGE',
+        author: 'Wiki Graph Explorer',
+        spine: 'WGE',
+        color: '#1e3a5f',
+        foil: '#d4af37',
+        height: 1.18,
+        thickness: 0.42,
+        project: true,
+        repo: 'Apanazar/WGE',
+        branch: 'main',
+        github: 'https://github.com/Apanazar/WGE',
+        images: [
+          // 'assets/projects/wge/1.jpg',
+        ],
+      },
+      {
+        id: 'seaf',
+        title: 'S.E.A.F.',
+        author: 'Secure Encrypted Archive Format',
+        spine: 'S.E.A.F.',
+        color: '#1a4a3a',
+        foil: '#e8d5a3',
+        height: 1.08,
+        thickness: 0.38,
+        project: true,
+        repo: 'Apanazar/seaf',
+        branch: 'main',
+        github: 'https://github.com/Apanazar/seaf',
+        images: [
+          // 'assets/projects/seaf/1.jpg',
+        ],
+      },
+      // Decorative atmosphere volumes (not inspectable as projects)
+      { id: 'd1', title: 'Ковёр', author: 'На стене', spine: 'КОВЁР', color: '#6b1d2a', foil: '#c9a227', height: 1.12, thickness: 0.32, project: false },
+      { id: 'd2', title: 'Нетсталкинг', author: 'sur.NET', spine: 'NET', color: '#2d4a3e', foil: '#e8d5a3', height: 1.0, thickness: 0.28, project: false },
+      { id: 'd3', title: 'OSINT', author: 'Полевые заметки', spine: 'OSINT', color: '#4a3060', foil: '#d4af37', height: 1.15, thickness: 0.35, project: false },
+      { id: 'd4', title: 'Rob Pike', author: 'Go Proverbs', spine: 'PIKE', color: '#7a3b1a', foil: '#f0e2c4', height: 0.96, thickness: 0.26, project: false },
+      { id: 'd5', title: 'Тёмная сеть', author: 'Threat Intel', spine: 'DARK', color: '#25231f', foil: '#a74735', height: 1.22, thickness: 0.4, project: false },
+      { id: 'd6', title: 'Домашний уют', author: 'Том I', spine: 'УЮТ', color: '#5c4033', foil: '#c9a227', height: 1.05, thickness: 0.3, project: false },
+    ];
 
-        let activeProject = null;
-        let carouselIndex = 0;
-        let carouselImages = [];
-        let lastFocus = null;
-        const readmeCache = new Map();
+    // —— DOM ——
+    const experience = document.getElementById('experience');
+    const canvas = document.getElementById('shelf-canvas');
+    const captionTitle = document.getElementById('caption-title');
+    const captionAuthor = document.getElementById('caption-author');
+    const captionIndex = document.getElementById('caption-index');
+    const captionTotal = document.getElementById('caption-total');
+    const inspectBtn = document.getElementById('inspect-button');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const ticksEl = document.getElementById('shelf-ticks');
+    const liveRegion = document.getElementById('live-region');
+    const detailsTitle = document.getElementById('details-title');
+    const detailsAuthor = document.getElementById('details-author');
+    const detailsIndex = document.getElementById('details-index');
+    const detailsTotal = document.getElementById('details-total');
+    const detailsGithub = document.getElementById('details-github');
+    const closeInspect = document.getElementById('close-inspect');
+    const readmeEl = document.getElementById('readme');
+    const carouselViewport = document.getElementById('carousel-viewport');
+    const carouselPlaceholder = document.getElementById('carousel-placeholder');
+    const carouselPathHint = document.getElementById('carousel-path-hint');
+    const carouselCounter = document.getElementById('carousel-counter');
+    const carouselPrev = document.getElementById('carousel-prev');
+    const carouselNext = document.getElementById('carousel-next');
+    const volumeCount = document.getElementById('volume-count');
 
-        function openModal(projectKey) {
-            const project = PROJECTS[projectKey];
-            if (!project) return;
+    const N = CATALOG.length;
+    volumeCount.textContent = `${String(N).padStart(2, '0')} VOLUMES`;
+    captionTotal.textContent = String(N).padStart(2, '0');
+    detailsTotal.textContent = String(N).padStart(2, '0');
+    ticksEl.style.setProperty('--book-count', N);
 
-            activeProject = project;
-            lastFocus = document.activeElement;
+    // —— State ——
+    let selected = 0;
+    let targetSelected = 0;
+    let focused = false;
+    let carouselIndex = 0;
+    let carouselImages = [];
+    const readmeCache = new Map();
 
-            modalTitle.textContent = project.title;
-            modalSubtitle.textContent = project.subtitle;
-            modalGithub.href = project.github;
-            carouselPathHint.textContent = `assets/projects/${project.id}/1.jpg`;
+    // Smooth scroll along shelf
+    let shelfScroll = 0;      // world X of focus point
+    let shelfScrollTarget = 0;
+    let dragPointerId = null;
+    let dragLastX = 0;
+    let dragMoved = false;
 
-            setupCarousel(project.images || []);
-            loadReadme(project);
+    // Book mesh data
+    const bookMeshes = [];
+    const bookBaseX = [];
+    let shelfGroup;
 
-            backdrop.hidden = false;
-            // force reflow for transition
-            void backdrop.offsetWidth;
-            backdrop.classList.add('open');
-            document.body.style.overflow = 'hidden';
-            modalClose.focus();
+    // —— Three.js setup ——
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance',
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.1, 80);
+    // Warm editorial angle — slightly above, looking down at shelf
+    const camBrowse = { pos: new THREE.Vector3(0, 1.55, 5.6), look: new THREE.Vector3(0, 0.55, 0) };
+    const camFocus = { pos: new THREE.Vector3(0.9, 1.15, 3.2), look: new THREE.Vector3(0.2, 0.7, 0) };
+    camera.position.copy(camBrowse.pos);
+    let camLook = camBrowse.look.clone();
+    camera.lookAt(camLook);
+
+    // Lights — warm domestic lamp + soft fill
+    const ambient = new THREE.AmbientLight(0xffe2b8, 0.55);
+    scene.add(ambient);
+
+    const key = new THREE.DirectionalLight(0xffd9a0, 1.35);
+    key.position.set(2.5, 5.5, 4);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.camera.near = 1;
+    key.shadow.camera.far = 20;
+    key.shadow.camera.left = -6;
+    key.shadow.camera.right = 6;
+    key.shadow.camera.top = 4;
+    key.shadow.camera.bottom = -2;
+    key.shadow.bias = -0.0002;
+    scene.add(key);
+
+    const rim = new THREE.DirectionalLight(0xffb0a0, 0.35);
+    rim.position.set(-4, 2, -2);
+    scene.add(rim);
+
+    const lamp = new THREE.PointLight(0xffc878, 18, 14, 2);
+    lamp.position.set(0, 3.2, 2.2);
+    scene.add(lamp);
+
+    // —— Procedural textures ——
+    function makeCanvas(w, h) {
+      const c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      return c;
+    }
+
+    function clothTexture(hex, foilHex, label, motif = 0) {
+      const w = 256, h = 512;
+      const c = makeCanvas(w, h);
+      const ctx = c.getContext('2d');
+
+      // base cloth
+      ctx.fillStyle = hex;
+      ctx.fillRect(0, 0, w, h);
+
+      // noise weave
+      for (let i = 0; i < 9000; i++) {
+        const x = Math.random() * w;
+        const y = Math.random() * h;
+        const a = 0.03 + Math.random() * 0.05;
+        ctx.fillStyle = Math.random() > 0.5
+          ? `rgba(255,255,255,${a})`
+          : `rgba(0,0,0,${a})`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+
+      // edge darkening
+      const g = ctx.createLinearGradient(0, 0, w, 0);
+      g.addColorStop(0, 'rgba(0,0,0,0.28)');
+      g.addColorStop(0.12, 'rgba(0,0,0,0)');
+      g.addColorStop(0.88, 'rgba(0,0,0,0)');
+      g.addColorStop(1, 'rgba(0,0,0,0.22)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+
+      // foil bands
+      ctx.strokeStyle = foilHex;
+      ctx.globalAlpha = 0.85;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(w * 0.22, h * 0.18);
+      ctx.lineTo(w * 0.78, h * 0.18);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(w * 0.22, h * 0.82);
+      ctx.lineTo(w * 0.78, h * 0.82);
+      ctx.stroke();
+
+      // abstract foil motif (mint-like geometric)
+      ctx.globalAlpha = 0.9;
+      ctx.fillStyle = foilHex;
+      ctx.strokeStyle = foilHex;
+      ctx.lineWidth = 2.5;
+      const cx = w / 2, cy = h * 0.42;
+      if (motif % 4 === 0) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, 28, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + 28);
+        ctx.lineTo(cx, cy + 70);
+        ctx.stroke();
+      } else if (motif % 4 === 1) {
+        for (let i = 0; i < 5; i++) {
+          ctx.fillRect(cx - 22, cy - 30 + i * 12, 44, 3);
+        }
+      } else if (motif % 4 === 2) {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - 36);
+        ctx.lineTo(cx + 30, cy + 20);
+        ctx.lineTo(cx - 30, cy + 20);
+        ctx.closePath();
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.arc(cx, cy - 10, 22, Math.PI * 0.15, Math.PI * 0.85);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx, cy + 18, 22, -Math.PI * 0.85, -Math.PI * 0.15);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      // vertical spine title
+      ctx.save();
+      ctx.translate(w / 2, h * 0.72);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillStyle = foilHex;
+      ctx.font = '600 28px "Newsreader", Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0,0,0,0.35)';
+      ctx.shadowBlur = 2;
+      ctx.fillText(label, 0, 0);
+      ctx.restore();
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = 8;
+      return tex;
+    }
+
+    function pageTexture() {
+      const c = makeCanvas(64, 256);
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#f0e6d0';
+      ctx.fillRect(0, 0, 64, 256);
+      for (let y = 0; y < 256; y += 3) {
+        ctx.fillStyle = y % 6 === 0 ? '#e2d4b4' : '#efe4c8';
+        ctx.fillRect(0, y, 64, 2);
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    function woodTexture() {
+      const c = makeCanvas(512, 128);
+      const ctx = c.getContext('2d');
+      const grd = ctx.createLinearGradient(0, 0, 0, 128);
+      grd.addColorStop(0, '#6b4532');
+      grd.addColorStop(0.35, '#4a2e20');
+      grd.addColorStop(0.7, '#3b2418');
+      grd.addColorStop(1, '#2a1810');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, 512, 128);
+      for (let i = 0; i < 80; i++) {
+        ctx.strokeStyle = `rgba(20,10,5,${0.04 + Math.random() * 0.08})`;
+        ctx.lineWidth = 1 + Math.random() * 2;
+        const y = Math.random() * 128;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.bezierCurveTo(128, y + (Math.random() - 0.5) * 8, 320, y + (Math.random() - 0.5) * 10, 512, y);
+        ctx.stroke();
+      }
+      // top highlight
+      ctx.fillStyle = 'rgba(255,220,170,0.12)';
+      ctx.fillRect(0, 0, 512, 10);
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      return tex;
+    }
+
+    const pagesTex = pageTexture();
+    const woodTex = woodTexture();
+
+    // —— Build shelf & books ——
+    function buildScene() {
+      shelfGroup = new THREE.Group();
+      scene.add(shelfGroup);
+
+      // shelf plank
+      const shelfW = N * 0.55 + 2.4;
+      const plankGeo = new THREE.BoxGeometry(shelfW, 0.12, 1.15);
+      const plankMat = new THREE.MeshStandardMaterial({
+        map: woodTex,
+        roughness: 0.55,
+        metalness: 0.05,
+      });
+      const plank = new THREE.Mesh(plankGeo, plankMat);
+      plank.position.set(0, 0, 0);
+      plank.castShadow = true;
+      plank.receiveShadow = true;
+      shelfGroup.add(plank);
+
+      // front lip
+      const lip = new THREE.Mesh(
+        new THREE.BoxGeometry(shelfW, 0.06, 0.06),
+        plankMat
+      );
+      lip.position.set(0, 0.03, 0.56);
+      lip.castShadow = true;
+      shelfGroup.add(lip);
+
+      // underside shadow catcher (slight)
+      const catcher = new THREE.Mesh(
+        new THREE.PlaneGeometry(shelfW + 1.5, 3),
+        new THREE.ShadowMaterial({ opacity: 0.28 })
+      );
+      catcher.rotation.x = -Math.PI / 2;
+      catcher.position.y = -0.061;
+      catcher.receiveShadow = true;
+      shelfGroup.add(catcher);
+
+      // wall plane behind with carpet feel (subtle, canvas is transparent over CSS carpet)
+      const wall = new THREE.Mesh(
+        new THREE.PlaneGeometry(30, 16),
+        new THREE.MeshStandardMaterial({
+          color: 0x4a1824,
+          roughness: 0.95,
+          metalness: 0,
+          transparent: true,
+          opacity: 0.15,
+        })
+      );
+      wall.position.set(0, 2.2, -1.4);
+      scene.add(wall);
+
+      // place books
+      let x = -((N - 1) * 0.48) / 2;
+      CATALOG.forEach((book, i) => {
+        const depth = 0.78;
+        const height = 1.05 * book.height;
+        const thick = 0.34 * book.thickness * 2.2;
+
+        const spineTex = clothTexture(book.color, book.foil, book.spine, i);
+        const coverTex = clothTexture(book.color, book.foil, '', i + 2);
+
+        const materials = [
+          new THREE.MeshStandardMaterial({ map: pagesTex, roughness: 0.9 }), // +x pages
+          new THREE.MeshStandardMaterial({ map: spineTex, roughness: 0.78, metalness: 0.08 }), // -x spine (we'll rotate)
+          new THREE.MeshStandardMaterial({ color: book.color, roughness: 0.85 }), // +y top
+          new THREE.MeshStandardMaterial({ color: book.color, roughness: 0.85 }), // -y bottom
+          new THREE.MeshStandardMaterial({ map: coverTex, roughness: 0.78, metalness: 0.08 }), // +z front
+          new THREE.MeshStandardMaterial({ map: coverTex, roughness: 0.85 }), // -z back
+        ];
+
+        // Box: width=thickness (X), height=Y, depth=Z
+        const geo = new THREE.BoxGeometry(thick, height, depth);
+        // Fix materials order: we want spine on -X facing left when books stand
+        // Actually for books on shelf facing us: spine faces left (-X or +X depending on convention)
+        // Reorder: +x right pages, -x left spine, +z front cover
+        const mesh = new THREE.Mesh(geo, [
+          materials[0], // +X page edge
+          materials[1], // -X spine
+          materials[2],
+          materials[3],
+          materials[4], // +Z front
+          materials[5],
+        ]);
+
+        mesh.position.set(x, 0.06 + height / 2, 0.05);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.userData.index = i;
+        mesh.userData.baseY = mesh.position.y;
+        mesh.userData.baseZ = mesh.position.z;
+        mesh.userData.baseRotZ = (Math.random() - 0.5) * 0.028;
+        mesh.userData.baseRotY = (Math.random() - 0.5) * 0.03;
+        mesh.rotation.z = mesh.userData.baseRotZ;
+        mesh.rotation.y = mesh.userData.baseRotY;
+
+        shelfGroup.add(mesh);
+        bookMeshes.push(mesh);
+        bookBaseX.push(x);
+
+        x += thick + 0.06 + Math.random() * 0.02;
+      });
+
+      // re-center books on shelf
+      const mid = (bookBaseX[0] + bookBaseX[bookBaseX.length - 1]) / 2;
+      bookMeshes.forEach((m, i) => {
+        m.position.x -= mid;
+        bookBaseX[i] = m.position.x;
+      });
+
+      // rebuild plank width roughly around books
+      const span = Math.abs(bookBaseX[bookBaseX.length - 1] - bookBaseX[0]) + 1.6;
+      plank.scale.x = span / shelfW;
+      lip.scale.x = span / shelfW;
+    }
+
+    // —— UI ticks ——
+    function buildTicks() {
+      ticksEl.innerHTML = '';
+      CATALOG.forEach((book, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('aria-label', `Перейти к ${book.title}`);
+        if (book.project) b.classList.add('is-project');
+        b.innerHTML = '<span></span>';
+        b.addEventListener('click', () => goTo(i));
+        ticksEl.appendChild(b);
+      });
+    }
+
+    function updateChrome() {
+      const book = CATALOG[selected];
+      const idx = String(selected + 1).padStart(2, '0');
+      captionTitle.textContent = book.title;
+      captionAuthor.textContent = book.author;
+      captionIndex.textContent = idx;
+      detailsIndex.textContent = idx;
+      inspectBtn.disabled = !book.project;
+      inspectBtn.setAttribute('aria-label', book.project
+        ? `Открыть ${book.title}`
+        : 'Декоративный том');
+      btnPrev.disabled = selected <= 0;
+      btnNext.disabled = selected >= N - 1;
+
+      [...ticksEl.children].forEach((el, i) => {
+        el.classList.toggle('is-active', i === selected);
+        el.setAttribute('aria-current', i === selected ? 'true' : 'false');
+      });
+
+      liveRegion.textContent = `Выбрано: ${book.title} — ${book.author}`;
+      shelfScrollTarget = bookBaseX[selected] || 0;
+    }
+
+    function goTo(i) {
+      targetSelected = Math.max(0, Math.min(N - 1, i));
+      selected = targetSelected;
+      updateChrome();
+    }
+
+    function setFocused(on) {
+      const book = CATALOG[selected];
+      if (on && !book.project) return;
+      focused = on;
+      experience.classList.toggle('is-focused', focused);
+      document.getElementById('book-details').setAttribute('aria-hidden', focused ? 'false' : 'true');
+      document.getElementById('browse-caption').setAttribute('aria-hidden', focused ? 'true' : 'false');
+
+      if (focused) {
+        detailsTitle.textContent = book.title;
+        detailsAuthor.textContent = book.author;
+        detailsGithub.href = book.github || '#';
+        detailsGithub.style.display = book.github ? '' : 'none';
+        carouselPathHint.textContent = `assets/projects/${book.id}/1.jpg`;
+        setupCarousel(book.images || []);
+        loadReadme(book);
+      }
+    }
+
+    // —— Carousel / README ——
+    function setupCarousel(images) {
+      carouselImages = images.filter(Boolean);
+      carouselIndex = 0;
+      carouselViewport.querySelectorAll('img').forEach((img) => img.remove());
+
+      if (!carouselImages.length) {
+        carouselPlaceholder.style.display = 'block';
+        carouselCounter.textContent = '0 / 0';
+        carouselPrev.disabled = true;
+        carouselNext.disabled = true;
+        return;
+      }
+
+      carouselPlaceholder.style.display = 'none';
+      carouselImages.forEach((src, i) => {
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = `Скриншот ${i + 1}`;
+        img.loading = 'lazy';
+        if (i === 0) img.classList.add('active');
+        carouselViewport.appendChild(img);
+      });
+      updateCarousel();
+    }
+
+    function updateCarousel() {
+      const imgs = carouselViewport.querySelectorAll('img');
+      imgs.forEach((img, i) => img.classList.toggle('active', i === carouselIndex));
+      const t = carouselImages.length;
+      carouselCounter.textContent = t ? `${carouselIndex + 1} / ${t}` : '0 / 0';
+      carouselPrev.disabled = t <= 1;
+      carouselNext.disabled = t <= 1;
+    }
+
+    function shiftCarousel(d) {
+      if (carouselImages.length <= 1) return;
+      carouselIndex = (carouselIndex + d + carouselImages.length) % carouselImages.length;
+      updateCarousel();
+    }
+
+    async function loadReadme(book) {
+      if (!book.repo) {
+        readmeEl.innerHTML = '<p class="readme-loading">Декоративный том с домашней полки. Не проект на GitHub.</p>';
+        return;
+      }
+      if (readmeCache.has(book.repo)) {
+        renderReadme(readmeCache.get(book.repo), book);
+        return;
+      }
+      readmeEl.innerHTML = '<div class="readme-loading">Листаю README с GitHub…</div>';
+      const urls = [
+        `https://cdn.jsdelivr.net/gh/${book.repo}@${book.branch}/README.md`,
+        `https://raw.githubusercontent.com/${book.repo}/${book.branch}/README.md`,
+      ];
+      let text = null;
+      for (const url of urls) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(String(res.status));
+          text = await res.text();
+          break;
+        } catch (_) { /* try next */ }
+      }
+      if (text == null) {
+        readmeEl.innerHTML = `<div class="readme-error">Не удалось загрузить README. <a href="${book.github}" target="_blank" rel="noopener">Открыть на GitHub</a></div>`;
+        return;
+      }
+      readmeCache.set(book.repo, text);
+      renderReadme(text, book);
+    }
+
+    function renderReadme(md, book) {
+      if (typeof marked === 'undefined') {
+        readmeEl.innerHTML = `<pre>${md.replace(/[&<>]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</pre>`;
+        return;
+      }
+      marked.setOptions({ gfm: true, breaks: false });
+      readmeEl.innerHTML = marked.parse(md);
+      const base = `https://raw.githubusercontent.com/${book.repo}/${book.branch}/`;
+      readmeEl.querySelectorAll('img').forEach((img) => {
+        const src = img.getAttribute('src') || '';
+        if (!/^https?:\/\//i.test(src) && !src.startsWith('data:')) {
+          img.src = base + src.replace(/^\.\//, '');
+        }
+      });
+      readmeEl.querySelectorAll('a').forEach((a) => {
+        const href = a.getAttribute('href') || '';
+        if (href && !/^https?:\/\//i.test(href) && !href.startsWith('#') && !href.startsWith('mailto:')) {
+          a.href = `https://github.com/${book.repo}/blob/${book.branch}/` + href.replace(/^\.\//, '');
+        }
+        if (a.hostname && a.hostname !== location.hostname) {
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+        }
+      });
+    }
+
+    // —— Interaction ——
+    function onPointerDown(e) {
+      if (focused) return;
+      dragPointerId = e.pointerId;
+      dragLastX = e.clientX;
+      dragMoved = false;
+      canvas.setPointerCapture(e.pointerId);
+      canvas.classList.add('is-dragging');
+    }
+
+    function onPointerMove(e) {
+      if (dragPointerId !== e.pointerId) return;
+      const dx = e.clientX - dragLastX;
+      dragLastX = e.clientX;
+      if (Math.abs(dx) > 1) dragMoved = true;
+      // drag right → shelf scrolls left (browse next)
+      const worldDelta = -dx * 0.0065;
+      shelfScrollTarget += worldDelta;
+      // snap selection to nearest book while dragging
+      let nearest = 0;
+      let best = Infinity;
+      bookBaseX.forEach((bx, i) => {
+        const d = Math.abs(bx - shelfScrollTarget);
+        if (d < best) { best = d; nearest = i; }
+      });
+      if (nearest !== selected) {
+        selected = nearest;
+        targetSelected = nearest;
+        updateChrome();
+      }
+    }
+
+    function onPointerUp(e) {
+      if (dragPointerId !== e.pointerId) return;
+      dragPointerId = null;
+      canvas.classList.remove('is-dragging');
+      try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+      // click without drag → inspect if project
+      if (!dragMoved) {
+        const hit = pickBook(e.clientX, e.clientY);
+        if (hit != null) {
+          goTo(hit);
+          if (CATALOG[hit].project) setFocused(true);
+        }
+      } else {
+        // settle on nearest
+        goTo(selected);
+      }
+    }
+
+    function pickBook(clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      const mouse = new THREE.Vector2(
+        ((clientX - rect.left) / rect.width) * 2 - 1,
+        -((clientY - rect.top) / rect.height) * 2 + 1
+      );
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(mouse, camera);
+      const hits = raycaster.intersectObjects(bookMeshes);
+      if (!hits.length) return null;
+      return hits[0].object.userData.index;
+    }
+
+    canvas.addEventListener('pointerdown', onPointerDown);
+    canvas.addEventListener('pointermove', onPointerMove);
+    canvas.addEventListener('pointerup', onPointerUp);
+    canvas.addEventListener('pointercancel', onPointerUp);
+
+    canvas.addEventListener('wheel', (e) => {
+      if (focused) return;
+      e.preventDefault();
+      const dir = Math.sign(e.deltaY);
+      goTo(selected + dir);
+    }, { passive: false });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && focused) {
+        setFocused(false);
+        return;
+      }
+      if (focused) {
+        if (e.key === 'ArrowLeft') shiftCarousel(-1);
+        if (e.key === 'ArrowRight') shiftCarousel(1);
+        return;
+      }
+      if (e.key === 'ArrowLeft') goTo(selected - 1);
+      if (e.key === 'ArrowRight') goTo(selected + 1);
+      if (e.key === 'Enter') setFocused(true);
+    });
+
+    btnPrev.addEventListener('click', () => goTo(selected - 1));
+    btnNext.addEventListener('click', () => goTo(selected + 1));
+    inspectBtn.addEventListener('click', () => setFocused(true));
+    closeInspect.addEventListener('click', () => setFocused(false));
+    carouselPrev.addEventListener('click', () => shiftCarousel(-1));
+    carouselNext.addEventListener('click', () => shiftCarousel(1));
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // —— Animate ——
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = Math.min(clock.getDelta(), 0.05);
+      const t = clock.elapsedTime;
+
+      // smooth shelf scroll
+      shelfScroll += (shelfScrollTarget - shelfScroll) * (1 - Math.exp(-8 * dt));
+
+      // camera
+      const camTarget = focused ? camFocus : camBrowse;
+      // when browsing, camera tracks shelf slightly
+      const trackX = focused ? shelfScroll * 0.15 : shelfScroll * 0.35;
+      const desiredPos = camTarget.pos.clone();
+      desiredPos.x += trackX;
+      const desiredLook = camTarget.look.clone();
+      desiredLook.x += trackX;
+
+      camera.position.lerp(desiredPos, 1 - Math.exp(-3.2 * dt));
+      camLook.lerp(desiredLook, 1 - Math.exp(-3.2 * dt));
+      camera.lookAt(camLook);
+
+      // books — mint-style: selected pulls forward; inspect orbits cover toward camera
+      bookMeshes.forEach((mesh, i) => {
+        const isSel = i === selected;
+        const baseX = bookBaseX[i];
+
+        let pullZ = 0;
+        let liftY = 0;
+        let rotY = mesh.userData.baseRotY || 0;
+        let rotX = 0;
+        let scale = 1;
+
+        if (focused && isSel) {
+          pullZ = 1.05;
+          liftY = 0.12;
+          rotY = -0.72;
+          rotX = -0.1;
+          scale = 1.06;
+        } else if (focused && !isSel) {
+          pullZ = -0.2;
+          scale = 0.96;
+        } else if (isSel) {
+          pullZ = 0.32;
+          liftY = 0.045;
+          rotY = -0.1;
         }
 
-        function closeModal() {
-            backdrop.classList.remove('open');
-            document.body.style.overflow = '';
-            setTimeout(() => {
-                if (!backdrop.classList.contains('open')) {
-                    backdrop.hidden = true;
-                }
-            }, 250);
-            if (lastFocus && typeof lastFocus.focus === 'function') {
-                lastFocus.focus();
-            }
-            activeProject = null;
-        }
+        const breath = isSel && !focused ? Math.sin(t * 2.2) * 0.012 : 0;
+        const kPos = 1 - Math.exp(-9 * dt);
+        const kRot = 1 - Math.exp(-7 * dt);
 
-        function setupCarousel(images) {
-            carouselImages = images.filter(Boolean);
-            carouselIndex = 0;
+        mesh.position.x = baseX - shelfScroll;
+        mesh.position.y = THREE.MathUtils.lerp(mesh.position.y, mesh.userData.baseY + liftY + breath, kPos);
+        mesh.position.z = THREE.MathUtils.lerp(mesh.position.z, mesh.userData.baseZ + pullZ, kPos);
+        mesh.rotation.y = THREE.MathUtils.lerp(mesh.rotation.y, rotY, kRot);
+        mesh.rotation.x = THREE.MathUtils.lerp(mesh.rotation.x, rotX, kRot);
+        mesh.rotation.z = THREE.MathUtils.lerp(mesh.rotation.z, mesh.userData.baseRotZ, kRot);
+        const s = THREE.MathUtils.lerp(mesh.scale.x, scale, kPos);
+        mesh.scale.setScalar(s);
+      });
 
-            // remove previous images
-            carouselViewport.querySelectorAll('img').forEach((img) => img.remove());
+      // gentle lamp flicker
+      lamp.intensity = 17 + Math.sin(t * 1.7) * 0.6 + Math.sin(t * 3.1) * 0.3;
 
-            if (carouselImages.length === 0) {
-                carouselPlaceholder.style.display = 'block';
-                carouselCounter.textContent = '0 / 0';
-                btnPrev.disabled = true;
-                btnNext.disabled = true;
-                return;
-            }
+      renderer.render(scene, camera);
+    }
 
-            carouselPlaceholder.style.display = 'none';
+    // —— Boot ——
+    buildScene();
+    buildTicks();
+    // start on first project book
+    const firstProject = CATALOG.findIndex((b) => b.project);
+    goTo(firstProject >= 0 ? firstProject : 0);
+    updateChrome();
+    animate();
 
-            carouselImages.forEach((src, i) => {
-                const img = document.createElement('img');
-                img.src = src;
-                img.alt = `${activeProject.title} — скриншот ${i + 1}`;
-                img.loading = 'lazy';
-                if (i === 0) img.classList.add('active');
-                img.onerror = () => {
-                    img.style.display = 'none';
-                    img.dataset.broken = '1';
-                };
-                carouselViewport.appendChild(img);
-            });
-
-            updateCarouselUI();
-        }
-
-        function updateCarouselUI() {
-            const imgs = carouselViewport.querySelectorAll('img');
-            imgs.forEach((img, i) => {
-                img.classList.toggle('active', i === carouselIndex);
-            });
-            const total = carouselImages.length;
-            carouselCounter.textContent = total ? `${carouselIndex + 1} / ${total}` : '0 / 0';
-            btnPrev.disabled = total <= 1;
-            btnNext.disabled = total <= 1;
-        }
-
-        function shiftCarousel(delta) {
-            if (carouselImages.length <= 1) return;
-            carouselIndex = (carouselIndex + delta + carouselImages.length) % carouselImages.length;
-            updateCarouselUI();
-        }
-
-        async function loadReadme(project) {
-            const cacheKey = project.repo;
-            if (readmeCache.has(cacheKey)) {
-                renderReadme(readmeCache.get(cacheKey));
-                return;
-            }
-
-            readmeEl.innerHTML = '<div class="readme-loading">Листаю README с GitHub…</div>';
-
-            const urls = [
-                `https://cdn.jsdelivr.net/gh/${project.repo}@${project.branch}/README.md`,
-                `https://raw.githubusercontent.com/${project.repo}/${project.branch}/README.md`,
-            ];
-
-            let text = null;
-            let lastError = null;
-
-            for (const url of urls) {
-                try {
-                    const res = await fetch(url);
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    text = await res.text();
-                    break;
-                } catch (err) {
-                    lastError = err;
-                }
-            }
-
-            if (text == null) {
-                readmeEl.innerHTML = `
-                    <div class="readme-error">
-                        Не удалось загрузить README.
-                        <br>
-                        <a href="${project.github}" target="_blank" rel="noopener noreferrer">Открыть на GitHub</a>
-                        ${lastError ? `<br><small>${String(lastError.message || lastError)}</small>` : ''}
-                    </div>`;
-                return;
-            }
-
-            readmeCache.set(cacheKey, text);
-            renderReadme(text);
-        }
-
-        function renderReadme(markdown) {
-            if (typeof marked === 'undefined') {
-                readmeEl.innerHTML = `<pre>${escapeHtml(markdown)}</pre>`;
-                return;
-            }
-
-            marked.setOptions({
-                gfm: true,
-                breaks: false,
-            });
-
-            const html = marked.parse(markdown);
-            readmeEl.innerHTML = html;
-
-            // Rewrite relative image paths in README to raw GitHub
-            if (activeProject) {
-                const base = `https://raw.githubusercontent.com/${activeProject.repo}/${activeProject.branch}/`;
-                readmeEl.querySelectorAll('img').forEach((img) => {
-                    const src = img.getAttribute('src') || '';
-                    if (!/^https?:\/\//i.test(src) && !src.startsWith('data:')) {
-                        img.src = base + src.replace(/^\.\//, '');
-                    }
-                });
-                readmeEl.querySelectorAll('a').forEach((a) => {
-                    const href = a.getAttribute('href') || '';
-                    if (href && !/^https?:\/\//i.test(href) && !href.startsWith('#') && !href.startsWith('mailto:')) {
-                        a.href = `https://github.com/${activeProject.repo}/blob/${activeProject.branch}/` + href.replace(/^\.\//, '');
-                    }
-                    if (a.hostname && a.hostname !== location.hostname) {
-                        a.target = '_blank';
-                        a.rel = 'noopener noreferrer';
-                    }
-                });
-            }
-        }
-
-        function escapeHtml(str) {
-            return str
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-        }
-
-        // Book clicks
-        document.querySelectorAll('.book[data-project]').forEach((btn) => {
-            btn.addEventListener('click', () => openModal(btn.dataset.project));
-        });
-
-        modalClose.addEventListener('click', closeModal);
-        backdrop.addEventListener('click', (e) => {
-            if (e.target === backdrop) closeModal();
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (!backdrop.classList.contains('open')) return;
-            if (e.key === 'Escape') closeModal();
-            if (e.key === 'ArrowLeft') shiftCarousel(-1);
-            if (e.key === 'ArrowRight') shiftCarousel(1);
-        });
-
-        btnPrev.addEventListener('click', () => shiftCarousel(-1));
-        btnNext.addEventListener('click', () => shiftCarousel(1));
-    </script>
+    // ready
+    requestAnimationFrame(() => {
+      experience.classList.add('is-ready');
+      document.getElementById('loading-screen').setAttribute('aria-hidden', 'true');
+    });
+  </script>
 </body>
 </html>
