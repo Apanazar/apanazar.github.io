@@ -1,660 +1,839 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>abanazar@shell:~</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #0a0e0a;
-      --bg-panel: #0d140f;
-      --green: #33ff66;
-      --green-dim: #1a993d;
-      --green-glow: rgba(51, 255, 102, 0.35);
-      --amber: #ffb000;
-      --cyan: #4deeea;
-      --red: #ff4466;
-      --text: #b8f5c8;
-      --muted: #4a7a58;
-      --border: #1e3d28;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>abanazar@shell:~</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0e0a;
+        --bg-panel: #0d140f;
+        --green: #33ff66;
+        --green-dim: #1a993d;
+        --green-glow: rgba(51, 255, 102, 0.35);
+        --amber: #ffb000;
+        --cyan: #4deeea;
+        --red: #ff4466;
+        --text: #b8f5c8;
+        --muted: #4a7a58;
+        --border: #1e3d28;
+      }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-    html, body {
-      min-height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: "IBM Plex Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
-      font-size: 14px;
-      line-height: 1.55;
-    }
+      html,
+      body {
+        min-height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          "IBM Plex Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+        font-size: 14px;
+        line-height: 1.55;
+      }
 
-    body {
-      position: relative;
-      overflow-x: hidden;
-    }
+      body {
+        position: relative;
+        overflow-x: hidden;
+      }
 
-    /* CRT scanlines + vignette */
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      pointer-events: none;
-      background:
-        repeating-linear-gradient(
+      /* CRT scanlines + vignette */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        pointer-events: none;
+        background: repeating-linear-gradient(
           0deg,
           rgba(0, 0, 0, 0.12) 0px,
           rgba(0, 0, 0, 0.12) 1px,
           transparent 1px,
           transparent 3px
         );
-      opacity: 0.45;
-    }
-
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: 999;
-      pointer-events: none;
-      background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.55) 100%);
-    }
-
-    .noise {
-      position: fixed;
-      inset: 0;
-      z-index: 998;
-      pointer-events: none;
-      opacity: 0.04;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    }
-
-    .shell {
-      position: relative;
-      z-index: 1;
-      max-width: 920px;
-      margin: 0 auto;
-      padding: 1.5rem 1.25rem 3rem;
-    }
-
-    /* terminal chrome */
-    .term {
-      border: 1px solid var(--border);
-      background: var(--bg-panel);
-      box-shadow:
-        0 0 0 1px rgba(51, 255, 102, 0.06),
-        0 0 40px rgba(51, 255, 102, 0.06),
-        inset 0 0 80px rgba(0, 0, 0, 0.35);
-    }
-
-    .term-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.5rem 0.75rem;
-      border-bottom: 1px solid var(--border);
-      background: linear-gradient(180deg, #121a13, #0b100c);
-      user-select: none;
-    }
-
-    .term-dots {
-      display: flex;
-      gap: 6px;
-    }
-
-    .term-dots span {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      border: 1px solid rgba(0, 0, 0, 0.4);
-    }
-
-    .term-dots span:nth-child(1) { background: #ff5f56; }
-    .term-dots span:nth-child(2) { background: #ffbd2e; }
-    .term-dots span:nth-child(3) { background: #27c93f; }
-
-    .term-title {
-      color: var(--muted);
-      font-size: 0.75rem;
-      letter-spacing: 0.04em;
-      text-align: center;
-      flex: 1;
-    }
-
-    .term-title .hl { color: var(--green-dim); }
-
-    .term-body {
-      padding: 1.25rem 1.35rem 1.5rem;
-    }
-
-    /* blinking cursor */
-    .cursor {
-      display: inline-block;
-      width: 0.55em;
-      height: 1em;
-      background: var(--green);
-      margin-left: 2px;
-      vertical-align: text-bottom;
-      box-shadow: 0 0 8px var(--green-glow);
-      animation: blink 1.1s step-end infinite;
-    }
-
-    @keyframes blink {
-      50% { opacity: 0; }
-    }
-
-    .prompt {
-      color: var(--green);
-      text-shadow: 0 0 8px var(--green-glow);
-      margin-bottom: 0.35rem;
-      font-weight: 500;
-      font-size: 0.9rem;
-    }
-
-    .prompt .user { color: var(--cyan); }
-    .prompt .path { color: var(--amber); }
-    .prompt .cmd { color: var(--text); font-weight: 400; }
-
-    .line {
-      color: var(--muted);
-      font-size: 0.85rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .line span { color: var(--green-dim); }
-
-    /* header */
-    .whoami {
-      margin-bottom: 1.5rem;
-    }
-
-    .ascii {
-      color: var(--green);
-      text-shadow: 0 0 12px var(--green-glow);
-      font-size: clamp(0.45rem, 1.4vw, 0.7rem);
-      line-height: 1.15;
-      white-space: pre;
-      overflow-x: auto;
-      margin-bottom: 0.85rem;
-      opacity: 0.9;
-    }
-
-    h1 {
-      font-size: clamp(1.4rem, 3vw, 1.75rem);
-      font-weight: 600;
-      color: var(--green);
-      text-shadow: 0 0 16px var(--green-glow);
-      letter-spacing: 0.06em;
-      margin-bottom: 0.65rem;
-    }
-
-    h1::before {
-      content: "> ";
-      color: var(--green-dim);
-      text-shadow: none;
-    }
-
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-bottom: 1rem;
-    }
-
-    .tag {
-      border: 1px solid var(--border);
-      color: var(--green-dim);
-      padding: 0.15rem 0.5rem;
-      font-size: 0.75rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      background: rgba(51, 255, 102, 0.04);
-    }
-
-    .tag.hot {
-      border-color: rgba(51, 255, 102, 0.35);
-      color: var(--green);
-      box-shadow: 0 0 12px rgba(51, 255, 102, 0.08);
-    }
-
-    .tag.warn {
-      border-color: rgba(255, 176, 0, 0.35);
-      color: var(--amber);
-    }
-
-    .bio {
-      color: var(--text);
-      max-width: 62ch;
-      opacity: 0.9;
-      margin-bottom: 0.25rem;
-    }
-
-    .bio .dim { color: var(--muted); }
-
-    /* sections */
-    section {
-      margin-top: 1.75rem;
-      padding-top: 1.25rem;
-      border-top: 1px dashed var(--border);
-    }
-
-    h2 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--cyan);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 1rem;
-      text-shadow: 0 0 10px rgba(77, 238, 234, 0.25);
-    }
-
-    h2::before {
-      content: "~/";
-      color: var(--muted);
-      text-shadow: none;
-      font-weight: 400;
-    }
-
-    /* experience */
-    .job {
-      margin-bottom: 1.35rem;
-      padding-left: 0.85rem;
-      border-left: 2px solid var(--border);
-    }
-
-    .job:hover {
-      border-left-color: var(--green-dim);
-    }
-
-    .job-head {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 0.35rem 1rem;
-      margin-bottom: 0.15rem;
-    }
-
-    .job-head a {
-      color: var(--green);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 1.05rem;
-    }
-
-    .job-head a:hover {
-      text-shadow: 0 0 10px var(--green-glow);
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
-    .job-date {
-      color: var(--muted);
-      font-size: 0.8rem;
-    }
-
-    .job-date::before {
-      content: "[";
-      color: var(--border);
-    }
-
-    .job-date::after {
-      content: "]";
-      color: var(--border);
-    }
-
-    .job-role {
-      color: var(--amber);
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .job ul {
-      list-style: none;
-      color: var(--text);
-      opacity: 0.88;
-      font-size: 0.88rem;
-    }
-
-    .job li {
-      position: relative;
-      padding-left: 1.1rem;
-      margin-bottom: 0.35rem;
-    }
-
-    .job li::before {
-      content: "▸";
-      position: absolute;
-      left: 0;
-      color: var(--green-dim);
-    }
-
-    /* projects */
-    .projects {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 0.75rem;
-    }
-
-    .project {
-      display: block;
-      text-decoration: none;
-      color: inherit;
-      border: 1px solid var(--border);
-      background: rgba(51, 255, 102, 0.02);
-      padding: 0.9rem 1rem;
-      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
-    }
-
-    .project:hover {
-      border-color: var(--green-dim);
-      background: rgba(51, 255, 102, 0.06);
-      box-shadow: 0 0 20px rgba(51, 255, 102, 0.08);
-    }
-
-    .project-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.4rem;
-    }
-
-    .project-name {
-      color: var(--green);
-      font-weight: 600;
-      font-size: 1.05rem;
-      text-shadow: 0 0 8px var(--green-glow);
-    }
-
-    .project-badge {
-      font-size: 0.65rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      border: 1px solid var(--border);
-      padding: 0.1rem 0.35rem;
-    }
-
-    .project-desc {
-      font-size: 0.85rem;
-      color: var(--text);
-      opacity: 0.8;
-      margin-bottom: 0.55rem;
-      line-height: 1.4;
-    }
-
-    .project-path {
-      font-size: 0.75rem;
-      color: var(--cyan);
-      opacity: 0.75;
-    }
-
-    .project-path::before {
-      content: "$ git clone ";
-      color: var(--muted);
-    }
-
-    /* skills */
-    .skills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-    }
-
-    .skill {
-      font-size: 0.8rem;
-      color: var(--green-dim);
-      border: 1px solid var(--border);
-      padding: 0.25rem 0.55rem;
-      background: rgba(0, 0, 0, 0.25);
-    }
-
-    .skill:hover {
-      color: var(--green);
-      border-color: var(--green-dim);
-    }
-
-    /* contacts */
-    .contacts {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem 1.25rem;
-      margin-top: 1.5rem;
-      padding-top: 1.15rem;
-      border-top: 1px solid var(--border);
-    }
-
-    .contacts a {
-      color: var(--text);
-      text-decoration: none;
-      font-size: 0.9rem;
-    }
-
-    .contacts a:hover {
-      color: var(--green);
-      text-shadow: 0 0 8px var(--green-glow);
-    }
-
-    .contacts a::before {
-      content: "→ ";
-      color: var(--green-dim);
-    }
-
-    .status {
-      margin-top: 1.5rem;
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .status .ok {
-      color: var(--green);
-    }
-
-    .status .ok::before {
-      content: "● ";
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.35; }
-    }
-
-    /* type-in for first lines */
-    .boot {
-      color: var(--muted);
-      font-size: 0.8rem;
-      margin-bottom: 1rem;
-      min-height: 3.2em;
-    }
-
-    .boot .ok { color: var(--green-dim); }
-    .boot .err { color: var(--red); }
-
-    @media (max-width: 560px) {
-      .shell { padding: 0.85rem 0.65rem 2rem; }
-      .term-body { padding: 1rem 0.85rem 1.25rem; }
-      .ascii { font-size: 0.38rem; }
-      .job-head { flex-direction: column; align-items: flex-start; }
-      .contacts { flex-direction: column; gap: 0.55rem; }
-    }
-  </style>
-</head>
-<body>
-  <div class="noise" aria-hidden="true"></div>
-
-  <div class="shell">
-    <div class="term">
-      <div class="term-bar">
-        <div class="term-dots" aria-hidden="true"><span></span><span></span><span></span></div>
-        <div class="term-title">
-          <span class="hl">abanazar</span> — zsh — 80×24
-        </div>
-        <div style="width: 48px"></div>
-      </div>
-
-      <div class="term-body">
-        <div class="boot" id="boot" aria-hidden="true"></div>
-
-        <div class="prompt">
-          <span class="user">abanazar</span><span style="color:var(--muted)">@</span><span class="user">darknet</span>
-          <span style="color:var(--muted)">:</span>
-          <span class="path">~</span>
-          <span style="color:var(--muted)">$</span>
-          <span class="cmd"> whoami && cat ./RESUME.md</span><span class="cursor" aria-hidden="true"></span>
-        </div>
-        <p class="line">uid=1337(<span>abanazar</span>) gid=0(root) groups=0(root),31337(netstalkers)</p>
-
-        <header class="whoami">
-          <h1>ABANAZAR</h1>
-          <div class="tags">
-            <span class="tag hot">OSINT</span>
-            <span class="tag warn">Dark Web</span>
-            <span class="tag hot">Threat Intel</span>
-            <span class="tag">Golang</span>
-            <span class="tag">netstalking</span>
+        opacity: 0.45;
+      }
+
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        pointer-events: none;
+        background: radial-gradient(
+          ellipse at center,
+          transparent 50%,
+          rgba(0, 0, 0, 0.55) 100%
+        );
+      }
+
+      .noise {
+        position: fixed;
+        inset: 0;
+        z-index: 998;
+        pointer-events: none;
+        opacity: 0.04;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+
+      .shell {
+        position: relative;
+        z-index: 1;
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 1.5rem 1.25rem 3rem;
+      }
+
+      /* terminal chrome */
+      .term {
+        border: 1px solid var(--border);
+        background: var(--bg-panel);
+        box-shadow:
+          0 0 0 1px rgba(51, 255, 102, 0.06),
+          0 0 40px rgba(51, 255, 102, 0.06),
+          inset 0 0 80px rgba(0, 0, 0, 0.35);
+      }
+
+      .term-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid var(--border);
+        background: linear-gradient(180deg, #121a13, #0b100c);
+        user-select: none;
+      }
+
+      .term-dots {
+        display: flex;
+        gap: 6px;
+      }
+
+      .term-dots span {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 1px solid rgba(0, 0, 0, 0.4);
+      }
+
+      .term-dots span:nth-child(1) {
+        background: #ff5f56;
+      }
+      .term-dots span:nth-child(2) {
+        background: #ffbd2e;
+      }
+      .term-dots span:nth-child(3) {
+        background: #27c93f;
+      }
+
+      .term-title {
+        color: var(--muted);
+        font-size: 0.75rem;
+        letter-spacing: 0.04em;
+        text-align: center;
+        flex: 1;
+      }
+
+      .term-title .hl {
+        color: var(--green-dim);
+      }
+
+      .term-body {
+        padding: 1.25rem 1.35rem 1.5rem;
+      }
+
+      /* blinking cursor */
+      .cursor {
+        display: inline-block;
+        width: 0.55em;
+        height: 1em;
+        background: var(--green);
+        margin-left: 2px;
+        vertical-align: text-bottom;
+        box-shadow: 0 0 8px var(--green-glow);
+        animation: blink 1.1s step-end infinite;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      .prompt {
+        color: var(--green);
+        text-shadow: 0 0 8px var(--green-glow);
+        margin-bottom: 0.35rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+
+      .prompt .user {
+        color: var(--cyan);
+      }
+      .prompt .path {
+        color: var(--amber);
+      }
+      .prompt .cmd {
+        color: var(--text);
+        font-weight: 400;
+      }
+
+      .line {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .line span {
+        color: var(--green-dim);
+      }
+
+      /* header */
+      .whoami {
+        margin-bottom: 1.5rem;
+      }
+
+      .ascii {
+        color: var(--green);
+        text-shadow: 0 0 12px var(--green-glow);
+        font-size: clamp(0.45rem, 1.4vw, 0.7rem);
+        line-height: 1.15;
+        white-space: pre;
+        overflow-x: auto;
+        margin-bottom: 0.85rem;
+        opacity: 0.9;
+      }
+
+      h1 {
+        font-size: clamp(1.4rem, 3vw, 1.75rem);
+        font-weight: 600;
+        color: var(--green);
+        text-shadow: 0 0 16px var(--green-glow);
+        letter-spacing: 0.06em;
+        margin-bottom: 0.65rem;
+      }
+
+      h1::before {
+        content: "> ";
+        color: var(--green-dim);
+        text-shadow: none;
+      }
+
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-bottom: 1rem;
+      }
+
+      .tag {
+        border: 1px solid var(--border);
+        color: var(--green-dim);
+        padding: 0.15rem 0.5rem;
+        font-size: 0.75rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        background: rgba(51, 255, 102, 0.04);
+      }
+
+      .tag.hot {
+        border-color: rgba(51, 255, 102, 0.35);
+        color: var(--green);
+        box-shadow: 0 0 12px rgba(51, 255, 102, 0.08);
+      }
+
+      .tag.warn {
+        border-color: rgba(255, 176, 0, 0.35);
+        color: var(--amber);
+      }
+
+      .bio {
+        color: var(--text);
+        max-width: 62ch;
+        opacity: 0.9;
+        margin-bottom: 0.25rem;
+      }
+
+      .bio .dim {
+        color: var(--muted);
+      }
+
+      /* sections */
+      section {
+        margin-top: 1.75rem;
+        padding-top: 1.25rem;
+        border-top: 1px dashed var(--border);
+      }
+
+      h2 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--cyan);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+        text-shadow: 0 0 10px rgba(77, 238, 234, 0.25);
+      }
+
+      h2::before {
+        content: "~/";
+        color: var(--muted);
+        text-shadow: none;
+        font-weight: 400;
+      }
+
+      /* experience */
+      .job {
+        margin-bottom: 1.35rem;
+        padding-left: 0.85rem;
+        border-left: 2px solid var(--border);
+      }
+
+      .job:hover {
+        border-left-color: var(--green-dim);
+      }
+
+      .job-head {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.35rem 1rem;
+        margin-bottom: 0.15rem;
+      }
+
+      .job-head a {
+        color: var(--green);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.05rem;
+      }
+
+      .job-head a:hover {
+        text-shadow: 0 0 10px var(--green-glow);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .job-date {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .job-date::before {
+        content: "[";
+        color: var(--border);
+      }
+
+      .job-date::after {
+        content: "]";
+        color: var(--border);
+      }
+
+      .job-role {
+        color: var(--amber);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .job ul {
+        list-style: none;
+        color: var(--text);
+        opacity: 0.88;
+        font-size: 0.88rem;
+      }
+
+      .job li {
+        position: relative;
+        padding-left: 1.1rem;
+        margin-bottom: 0.35rem;
+      }
+
+      .job li::before {
+        content: "▸";
+        position: absolute;
+        left: 0;
+        color: var(--green-dim);
+      }
+
+      /* projects */
+      .projects {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 0.75rem;
+      }
+
+      .project {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        border: 1px solid var(--border);
+        background: rgba(51, 255, 102, 0.02);
+        padding: 0.9rem 1rem;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s,
+          background 0.15s;
+      }
+
+      .project:hover {
+        border-color: var(--green-dim);
+        background: rgba(51, 255, 102, 0.06);
+        box-shadow: 0 0 20px rgba(51, 255, 102, 0.08);
+      }
+
+      .project-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .project-name {
+        color: var(--green);
+        font-weight: 600;
+        font-size: 1.05rem;
+        text-shadow: 0 0 8px var(--green-glow);
+      }
+
+      .project-badge {
+        font-size: 0.65rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        padding: 0.1rem 0.35rem;
+      }
+
+      .project-desc {
+        font-size: 0.85rem;
+        color: var(--text);
+        opacity: 0.8;
+        margin-bottom: 0.55rem;
+        line-height: 1.4;
+      }
+
+      .project-path {
+        font-size: 0.75rem;
+        color: var(--cyan);
+        opacity: 0.75;
+      }
+
+      .project-path::before {
+        content: "$ git clone ";
+        color: var(--muted);
+      }
+
+      /* skills */
+      .skills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+
+      .skill {
+        font-size: 0.8rem;
+        color: var(--green-dim);
+        border: 1px solid var(--border);
+        padding: 0.25rem 0.55rem;
+        background: rgba(0, 0, 0, 0.25);
+      }
+
+      .skill:hover {
+        color: var(--green);
+        border-color: var(--green-dim);
+      }
+
+      /* contacts */
+      .contacts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1.25rem;
+        margin-top: 1.5rem;
+        padding-top: 1.15rem;
+        border-top: 1px solid var(--border);
+      }
+
+      .contacts a {
+        color: var(--text);
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+
+      .contacts a:hover {
+        color: var(--green);
+        text-shadow: 0 0 8px var(--green-glow);
+      }
+
+      .contacts a::before {
+        content: "→ ";
+        color: var(--green-dim);
+      }
+
+      .status {
+        margin-top: 1.5rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .status .ok {
+        color: var(--green);
+      }
+
+      .status .ok::before {
+        content: "● ";
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.35;
+        }
+      }
+
+      /* type-in for first lines */
+      .boot {
+        color: var(--muted);
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+        min-height: 3.2em;
+      }
+
+      .boot .ok {
+        color: var(--green-dim);
+      }
+      .boot .err {
+        color: var(--red);
+      }
+
+      @media (max-width: 560px) {
+        .shell {
+          padding: 0.85rem 0.65rem 2rem;
+        }
+        .term-body {
+          padding: 1rem 0.85rem 1.25rem;
+        }
+        .ascii {
+          font-size: 0.38rem;
+        }
+        .job-head {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .contacts {
+          flex-direction: column;
+          gap: 0.55rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+
+    <div class="shell">
+      <div class="term">
+        <div class="term-bar">
+          <div class="term-dots" aria-hidden="true">
+            <span></span><span></span><span></span>
           </div>
-          <p class="bio">
-            Speaks at infosec events on <span class="dim">OSINT</span> &amp; dark web threat intelligence.
-            Runs the Russian-speaking <span class="dim">netstalking</span> community.
-            Spreads Golang through the gospels of <span class="dim">Rob Pike</span> &amp; <span class="dim">Brian Kernighan</span>.
+          <div class="term-title">
+            <span class="hl">abanazar</span> — zsh — 80×24
+          </div>
+          <div style="width: 48px"></div>
+        </div>
+
+        <div class="term-body">
+          <div class="boot" id="boot" aria-hidden="true"></div>
+
+          <div class="prompt">
+            <span class="user">abanazar</span
+            ><span style="color: var(--muted)">@</span
+            ><span class="user">github.io</span>
+            <span style="color: var(--muted)">:</span>
+            <span class="path">~</span>
+            <span style="color: var(--muted)">$</span>
+            <span class="cmd"> whoami && cat ./RESUME.md</span
+            ><span class="cursor" aria-hidden="true"></span>
+          </div>
+          <p class="line">
+            uid=1337(<span>abanazar</span>) gid=0(root)
+            groups=0(root)
           </p>
-        </header>
 
-        <section>
-          <h2>experience.log</h2>
-
-          <article class="job">
-            <div class="job-head">
-              <a href="https://bi.zone/" target="_blank" rel="noopener noreferrer">BI.ZONE</a>
-              <span class="job-date">Apr 2023 — Mar 2025 · 2 yrs</span>
+          <header class="whoami">
+            <h1>ABANAZAR</h1>
+            <div class="tags">
+              <span class="tag hot">OSINT</span>
+              <span class="tag warn">Dark Web</span>
+              <span class="tag hot">Threat Intelligence</span>
+              <span class="tag">Golang</span>
+              <span class="tag">Zig</span>
+              <span class="tag">Netstalking</span>
             </div>
-            <div class="job-role">// Golang Developer</div>
-            <ul>
-              <li>Tools for flagship EDR products — performance, UX, boxed server solutions</li>
-              <li>Code reviews, refactoring, testability (mocks + real components)</li>
-              <li>Owned high-load services from design to release</li>
-              <li>CLI, PostgreSQL, Kafka, gORM; Docker for isolated product deploys</li>
-              <li>1st place GO.ZONE hackathon — AI assistant for InfoSec processes</li>
-            </ul>
-          </article>
+            <p class="bio">
+              Speaks at infosec events on <span class="dim">OSINT</span> &amp;
+              dark web threat intelligence. Runs the Russian-speaking
+              <span class="dim">netstalking</span> community. Spreads Golang
+              through the gospels of <span class="dim">Rob Pike</span> &amp;
+              <span class="dim">Brian Kernighan</span>.
+            </p>
+          </header>
 
-          <article class="job">
-            <div class="job-head">
-              <a href="https://jetinfosystems.com/" target="_blank" rel="noopener noreferrer">Jet Information Systems</a>
-              <span class="job-date">Jul 2021 — Feb 2023 · 1 yr 8 mo</span>
-            </div>
-            <div class="job-role">// Information Security Analyst</div>
-            <ul>
-              <li>Automation: parsers, crawlers, reporting pipelines</li>
-              <li>OSINT — media, Telegram, GitHub; leaked document analysis</li>
-              <li>External perimeter monitoring for corporate clients</li>
-              <li>CVE/CPE triage and criticality reports</li>
-              <li>Web-scale phishing resource identification</li>
-            </ul>
-          </article>
+          <section>
+            <h2>experience.log</h2>
 
-          <article class="job">
-            <div class="job-head">
-              <a href="https://www.epam.com/" target="_blank" rel="noopener noreferrer">EPAM Systems Inc.</a>
-              <span class="job-date">Nov 2020 — May 2021 · 7 mo</span>
-            </div>
-            <div class="job-role">// Golang Developer</div>
-            <ul>
-              <li>High-performance backend services in Go</li>
-              <li>gORM, gRPC microservices, Docker &amp; Kubernetes</li>
-            </ul>
-          </article>
-        </section>
-
-        <section>
-          <h2>projects/</h2>
-          <div class="projects">
-            <a class="project" href="https://github.com/Apanazar/WGE" target="_blank" rel="noopener noreferrer">
-              <div class="project-top">
-                <span class="project-name">WGE</span>
+            <article class="job">
+              <div class="job-head">
+                <a
+                  href="https://bi.zone/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >BI.ZONE</a
+                >
+                <span class="job-date">Apr 2023 — Mar 2025 · 2 yrs</span>
               </div>
-              <p class="project-desc">Wiki Graph Explorer — turn Wikipedia into an interactive link graph for research rabbit holes.</p>
-              <div class="project-path">github.com/Apanazar/WGE</div>
-            </a>
-            <a class="project" href="https://github.com/Apanazar/seaf" target="_blank" rel="noopener noreferrer">
-              <div class="project-top">
-                <span class="project-name">S.E.A.F.</span>
+              <div class="job-role">// Golang Developer</div>
+              <ul>
+                <li>
+                  Development of software tools for customers of flagship EDR
+                  products that provide high performance, instant access to the
+                  necessary functionality and ease of use on flagship boxed
+                  solutions on server hardware
+                </li>
+                <li>
+                  Conducting code reviews in product teams and carrying out
+                  refactoring, which contributed to improving the quality and
+                  maintainability of projects. Also, improving the quality of
+                  the code helped teams better cover it with test scenarios by
+                  supporting both mock data implementation and real-world
+                  application of components.
+                </li>
+                <li>
+                  Project management from the design stage to the successful
+                  release, each of which was a highly loaded service.
+                </li>
+                <li>
+                  The use of CLI libraries to create user-friendly command
+                  interfaces, effective work with PostgreSQL, Kafka and ORM
+                  tools (gORM).
+                </li>
+                <li>
+                  Configuring the interaction of Docker containers for deploying
+                  company products in a virtual isolated environment, followed
+                  by accessing them for integration and testing.
+                </li>
+                <li>
+                  First place at GO.ZONE internal hackathon with AI assistant
+                  for information security business processes.
+                </li>
+              </ul>
+            </article>
+
+            <article class="job">
+              <div class="job-head">
+                <a
+                  href="https://jetinfosystems.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Jet Information Systems</a
+                >
+                <span class="job-date">Jul 2021 — Feb 2023 · 1 yr 8 mo</span>
               </div>
-              <p class="project-desc">Secure Encrypted Archive Format — AES-GCM + compression, custom .seaf binary in Go.</p>
-              <div class="project-path">github.com/Apanazar/seaf</div>
-            </a>
-          </div>
-        </section>
+              <div class="job-role">// Information Security Analyst</div>
+              <ul>
+                <li>
+                  Development and implementation of tools for automating
+                  analytical processes, including parsers, crawlers, and
+                  reporting mechanisms.
+                </li>
+                <li>
+                  Implementation of OSINT intelligence, including monitoring of
+                  media, telegram channels and GitHub repositories, search and
+                  analysis of hidden or leaked documents.
+                </li>
+                <li>
+                  Performing predictive analysis and monitoring of the external
+                  perimeters of the corporate clients' network.
+                </li>
+                <li>
+                  Development and implementation of innovative killer features
+                  to enhance the company's competitive advantage in the market.
+                </li>
+                <li>
+                  Identification of vulnerabilities and exploits (CVE, CPE) and
+                  compilation of criticality reports for making operational
+                  decisions to improve protection.
+                </li>
+                <li>
+                  Development and operation of a software solution for 100%
+                  identification and search of phishing resources on the web.
+                </li>
+              </ul>
+            </article>
 
-        <section>
-          <h2>skills.json</h2>
-          <div class="skills">
-            <span class="skill">Golang</span>
-            <span class="skill">C++</span>
-            <span class="skill">Zig</span>
-            <span class="skill">ASM x86</span>
-            <span class="skill">Bash</span>
-            <span class="skill">PostgreSQL</span>
-            <span class="skill">MySQL</span>
-            <span class="skill">MongoDB</span>
-            <span class="skill">Kafka</span>
-            <span class="skill">RabbitMQ</span>
-            <span class="skill">Redis</span>
-            <span class="skill">Docker</span>
-            <span class="skill">Kubernetes</span>
-            <span class="skill">gRPC</span>
-            <span class="skill">GraphQL</span>
-            <span class="skill">GNU/Linux</span>
-            <span class="skill">Git</span>
-            <span class="skill">CI/CD</span>
-            <span class="skill">Grafana</span>
-            <span class="skill">OSINT</span>
-            <span class="skill">Threat Intelligence</span>
-          </div>
-        </section>
+            <article class="job">
+              <div class="job-head">
+                <a
+                  href="https://www.epam.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >EPAM Systems Inc.</a
+                >
+                <span class="job-date">Nov 2020 — May 2021 · 7 mo</span>
+              </div>
+              <div class="job-role">// Golang Developer</div>
+              <ul>
+                <li>
+                  Design and development of high-performance backend services in
+                  the Golang programming language.
+                </li>
+                <li>
+                  Using standard practices and design patterns to create
+                  efficient and maintainable code.
+                </li>
+                <li>
+                  Integration and use of the gORM ORM library for database
+                  management, query optimization and efficient data interaction.
+                </li>
+                <li>
+                  Development of microservices using gRPC to ensure effective
+                  interaction between system components.
+                </li>
+                <li>
+                  Containerization of applications using Docker to ensure
+                  consistency and portability in deployment.
+                </li>
+                <li>
+                  Container management and orchestration using Kubernetes to
+                  ensure scalability and resource management.
+                </li>
+              </ul>
+            </article>
+          </section>
 
-        <div class="contacts">
-          <a href="mailto:abanazar@inbox.ru">ABANAZAR@INBOX.RU</a>
-          <a href="https://t.me/sur_NET" target="_blank" rel="noopener noreferrer">SUR.NETSTALKING</a>
-          <a href="https://github.com/Apanazar" target="_blank" rel="noopener noreferrer">GITHUB.COM/APANAZAR</a>
+          <section>
+            <h2>projects/</h2>
+            <div class="projects">
+              <a
+                class="project"
+                href="https://github.com/Apanazar/WGE"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div class="project-top">
+                  <span class="project-name">WGE</span>
+                </div>
+                <p class="project-desc">
+                  Wiki Graph Explorer — turn Wikipedia into an interactive link
+                  graph for research rabbit holes.
+                </p>
+                <div class="project-path">github.com/Apanazar/WGE</div>
+              </a>
+              <a
+                class="project"
+                href="https://github.com/Apanazar/seaf"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div class="project-top">
+                  <span class="project-name">S.E.A.F.</span>
+                </div>
+                <p class="project-desc">
+                  Secure Encrypted Archive Format — AES-GCM + compression,
+                  custom .seaf binary in Go.
+                </p>
+                <div class="project-path">github.com/Apanazar/seaf</div>
+              </a>
+            </div>
+          </section>
+
+          <section>
+            <h2>skills.json</h2>
+            <div class="skills">
+              <span class="skill">Golang</span>
+              <span class="skill">C++</span>
+              <span class="skill">Zig</span>
+              <span class="skill">ASM x86</span>
+              <span class="skill">Bash</span>
+              <span class="skill">PostgreSQL</span>
+              <span class="skill">MySQL</span>
+              <span class="skill">MongoDB</span>
+              <span class="skill">Kafka</span>
+              <span class="skill">RabbitMQ</span>
+              <span class="skill">Redis</span>
+              <span class="skill">Docker</span>
+              <span class="skill">Kubernetes</span>
+              <span class="skill">gRPC</span>
+              <span class="skill">GraphQL</span>
+              <span class="skill">GNU/Linux</span>
+              <span class="skill">Git</span>
+              <span class="skill">CI/CD</span>
+              <span class="skill">Grafana</span>
+              <span class="skill">OSINT</span>
+              <span class="skill">Threat Intelligence</span>
+            </div>
+          </section>
+
+          <div class="contacts">
+            <a href="mailto:abanazar@inbox.ru">ABANAZAR@INBOX.RU</a>
+            <a
+              href="https://t.me/sur_NET"
+              target="_blank"
+              rel="noopener noreferrer"
+              >SUR.NETSTALKING</a
+            >
+            <a
+              href="https://github.com/Apanazar"
+              target="_blank"
+              rel="noopener noreferrer"
+              >GITHUB.COM/APANAZAR</a
+            >
+          </div>
+
+          <p class="status">
+            <span class="ok">online</span>
+            · session encrypted · no cookies · root shell ready
+          </p>
         </div>
-
-        <p class="status">
-          <span class="ok">online</span>
-          · session encrypted · no cookies · root shell ready
-        </p>
       </div>
     </div>
-  </div>
 
-  <script>
-    const boot = document.getElementById('boot');
-    const lines = [
-      { t: '[  OK  ] mounted /dev/mind', c: 'ok' },
-      { t: '[  OK  ] loaded threat_intel.ko', c: 'ok' },
-      { t: '[  OK  ] netstalking daemon started', c: 'ok' },
-      { t: '[boot] welcome, operator.', c: '' },
-    ];
+    <script>
+      const boot = document.getElementById("boot");
+      const lines = [
+        { t: "[  OK  ] mounted /dev/mind", c: "ok" },
+        { t: "[  OK  ] loaded threat_intel.ko", c: "ok" },
+        { t: "[  OK  ] netstalking daemon started", c: "ok" },
+      ];
 
-    let i = 0;
-    function next() {
-      if (i >= lines.length) return;
-      const row = document.createElement('div');
-      if (lines[i].c) row.className = lines[i].c;
-      row.textContent = lines[i].t;
-      boot.appendChild(row);
-      i++;
-      setTimeout(next, 120 + Math.random() * 80);
-    }
-    next();
-  </script>
-</body>
+      let i = 0;
+      function next() {
+        if (i >= lines.length) return;
+        const row = document.createElement("div");
+        if (lines[i].c) row.className = lines[i].c;
+        row.textContent = lines[i].t;
+        boot.appendChild(row);
+        i++;
+        setTimeout(next, 120 + Math.random() * 80);
+      }
+      next();
+    </script>
+  </body>
 </html>
